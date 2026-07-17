@@ -608,7 +608,8 @@
             gap: 0.5rem;
             flex-wrap: wrap;
             align-items: center;
-            width: 100%;
+            flex: 1;
+            min-width: 200px;
         }
 
         .link-card .link-actions .edit-form input[type="url"] {
@@ -1389,8 +1390,10 @@
                                     </a>
                                     <div class="link-original">→ <%= link.originalUrl %></div>
                                 </div>
-                                <!-- Copy Button -->
-                                <button class="btn btn-secondary btn-sm" onclick="copyToClipboard('<%= link.shortUrl %>')" style="flex-shrink: 0;">
+                                <!-- ===== COPY BUTTON - FIXED ===== -->
+                                <button class="btn btn-secondary btn-sm" 
+                                        onclick="copyToClipboard('<%= link.shortUrl %>')" 
+                                        style="flex-shrink: 0; cursor: pointer;">
                                     📋 Copy
                                 </button>
                             </div>
@@ -1452,7 +1455,7 @@
     </footer>
 
     <!-- ============================================================ -->
-    <!-- SCRIPTS -->
+    <!-- SCRIPTS - FIXED COPY FUNCTION -->
     <!-- ============================================================ -->
     <script>
         // ============================================================
@@ -1560,60 +1563,108 @@
         })();
 
         // ============================================================
-        // COPY TO CLIPBOARD
+        // COPY TO CLIPBOARD - FIXED VERSION
         // ============================================================
         function copyToClipboard(text) {
+            // Clean the text - remove any extra spaces or special characters
+            const cleanText = text.trim();
+            
+            console.log('📋 Copying:', cleanText); // Debug log
+            
+            // Method 1: Modern clipboard API
             if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(text).then(() => {
+                navigator.clipboard.writeText(cleanText).then(() => {
                     showToast('✅ Link copied to clipboard!');
-                }).catch(() => {
-                    fallbackCopy(text);
+                    console.log('✅ Copied successfully via clipboard API');
+                }).catch((err) => {
+                    console.error('❌ Clipboard API failed:', err);
+                    fallbackCopy(cleanText);
                 });
             } else {
-                fallbackCopy(text);
+                // Method 2: Fallback for older browsers
+                fallbackCopy(cleanText);
             }
         }
 
         function fallbackCopy(text) {
-            const input = document.createElement('input');
-            input.value = text;
-            document.body.appendChild(input);
-            input.select();
-            document.execCommand('copy');
-            document.body.removeChild(input);
-            showToast('✅ Link copied to clipboard!');
+            try {
+                // Create a temporary input element
+                const input = document.createElement('input');
+                input.setAttribute('value', text);
+                input.style.position = 'fixed';
+                input.style.opacity = '0';
+                input.style.pointerEvents = 'none';
+                input.style.width = '1px';
+                input.style.height = '1px';
+                document.body.appendChild(input);
+                
+                // Select and copy
+                input.select();
+                input.setSelectionRange(0, 99999);
+                
+                const success = document.execCommand('copy');
+                document.body.removeChild(input);
+                
+                if (success) {
+                    showToast('✅ Link copied to clipboard!');
+                    console.log('✅ Copied successfully via fallback');
+                } else {
+                    showToast('❌ Failed to copy. Please copy manually.');
+                    console.error('❌ Fallback copy failed');
+                }
+            } catch (err) {
+                console.error('❌ Copy error:', err);
+                showToast('❌ Failed to copy. Please copy manually.');
+            }
         }
 
         // ============================================================
         // TOAST NOTIFICATION
         // ============================================================
         function showToast(message) {
+            // Remove existing toast if any
+            const existingToast = document.querySelector('.custom-toast');
+            if (existingToast) {
+                existingToast.remove();
+            }
+            
             const toast = document.createElement('div');
+            toast.className = 'custom-toast';
             toast.textContent = message;
+            
+            // Style the toast
             Object.assign(toast.style, {
                 position: 'fixed',
                 bottom: '30px',
                 left: '50%',
                 transform: 'translateX(-50%)',
-                background: 'rgba(10,10,15,0.9)',
+                background: 'rgba(10,10,15,0.95)',
                 backdropFilter: 'blur(20px)',
                 color: '#fff',
                 padding: '1rem 2rem',
                 borderRadius: '14px',
                 border: '1px solid rgba(255,255,255,0.08)',
-                boxShadow: '0 20px 40px -12px rgba(0,0,0,0.8), 0 0 30px rgba(108,99,255,0.1)',
+                boxShadow: '0 20px 40px -12px rgba(0,0,0,0.8), 0 0 30px rgba(108,99,255,0.15)',
                 zIndex: '9999',
                 fontFamily: 'Inter, sans-serif',
                 fontWeight: '500',
-                animation: 'fadeIn 0.4s ease',
+                fontSize: '0.95rem',
                 maxWidth: '90%',
-                textAlign: 'center'
+                textAlign: 'center',
+                animation: 'fadeIn 0.4s ease',
+                transition: 'opacity 0.4s ease'
             });
+            
             document.body.appendChild(toast);
+            
+            // Auto remove after 3 seconds
             setTimeout(() => {
                 toast.style.opacity = '0';
-                toast.style.transition = 'opacity 0.4s';
-                setTimeout(() => toast.remove(), 400);
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.remove();
+                    }
+                }, 400);
             }, 3000);
         }
 
