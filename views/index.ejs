@@ -1381,30 +1381,38 @@
                 <h2 style="margin-bottom: 1.5rem; font-weight: 700;">My Short Links</h2>
 
                 <% if (typeof links !== 'undefined' && links && links.length > 0) { %>
-                    <% links.forEach(function(link) { %>
-                        <div class="link-card">
+                    <% links.forEach(function(link) { 
+                        // Store the URL in a variable to ensure it's available
+                        const linkUrl = link.shortUrl || '';
+                        const linkId = link.id || link._id || '';
+                        const linkCode = link.shortCode || '';
+                        const linkOriginal = link.originalUrl || '';
+                        const linkClicks = link.clicks || 0;
+                        const linkCreated = link.createdAt || '';
+                    %>
+                        <div class="link-card" data-link-url="<%= linkUrl %>">
                             <div class="link-top">
                                 <div>
-                                    <a href="/<%= link.shortCode %>" target="_blank" class="link-url">
-                                        🔗 <%= link.shortUrl %>
+                                    <a href="/<%= linkCode %>" target="_blank" class="link-url">
+                                        🔗 <%= linkUrl %>
                                     </a>
-                                    <div class="link-original">→ <%= link.originalUrl %></div>
+                                    <div class="link-original">→ <%= linkOriginal %></div>
                                 </div>
-                                <!-- ===== COPY BUTTON - FIXED ===== -->
-                                <button class="btn btn-secondary btn-sm" 
-                                        onclick="copyToClipboard('<%= link.shortUrl %>')" 
+                                <!-- ===== COPY BUTTON - FIXED with data attribute ===== -->
+                                <button class="btn btn-secondary btn-sm copy-link-btn" 
+                                        data-url="<%= linkUrl %>"
                                         style="flex-shrink: 0; cursor: pointer;">
                                     📋 Copy
                                 </button>
                             </div>
                             <div class="link-meta">
-                                <span>👁️ <%= link.clicks %> clicks</span>
-                                <span>📅 <%= link.createdAt %></span>
-                                <span>🆔 <%= link.shortCode %></span>
+                                <span>👁️ <%= linkClicks %> clicks</span>
+                                <span>📅 <%= linkCreated %></span>
+                                <span>🆔 <%= linkCode %></span>
                             </div>
                             <div class="link-actions">
                                 <!-- Edit/Update Form -->
-                                <form action="/update-link/<%= link.id %>" method="POST" class="edit-form">
+                                <form action="/update-link/<%= linkId %>" method="POST" class="edit-form">
                                     <input type="url" name="newUrl" placeholder="Enter new URL" required>
                                     <div class="edit-actions">
                                         <button type="submit" class="btn btn-warning btn-sm">✏️ Update</button>
@@ -1412,7 +1420,7 @@
                                 </form>
                                 <!-- Delete Button -->
                                 <div class="btn-group">
-                                    <form action="/delete-link/<%= link.id %>" method="POST" style="display: inline;">
+                                    <form action="/delete-link/<%= linkId %>" method="POST" style="display: inline;">
                                         <button type="submit" class="btn btn-danger btn-sm"
                                                 onclick="return confirm('Are you sure you want to delete this link?')">
                                             🗑️ Delete
@@ -1455,7 +1463,7 @@
     </footer>
 
     <!-- ============================================================ -->
-    <!-- SCRIPTS - FIXED COPY FUNCTION -->
+    <!-- SCRIPTS -->
     <!-- ============================================================ -->
     <script>
         // ============================================================
@@ -1566,10 +1574,17 @@
         // COPY TO CLIPBOARD - FIXED VERSION
         // ============================================================
         function copyToClipboard(text) {
-            // Clean the text - remove any extra spaces or special characters
-            const cleanText = text.trim();
+            // Clean the text
+            const cleanText = String(text).trim();
             
-            console.log('📋 Copying:', cleanText); // Debug log
+            console.log('📋 Copying:', cleanText);
+            console.log('📋 Length:', cleanText.length);
+            
+            if (!cleanText || cleanText === '') {
+                showToast('❌ Error: Nothing to copy');
+                console.error('❌ Empty text to copy');
+                return;
+            }
             
             // Method 1: Modern clipboard API
             if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -1581,29 +1596,32 @@
                     fallbackCopy(cleanText);
                 });
             } else {
-                // Method 2: Fallback for older browsers
+                // Method 2: Fallback
                 fallbackCopy(cleanText);
             }
         }
 
+        // Fallback copy method
         function fallbackCopy(text) {
             try {
-                // Create a temporary input element
-                const input = document.createElement('input');
-                input.setAttribute('value', text);
-                input.style.position = 'fixed';
-                input.style.opacity = '0';
-                input.style.pointerEvents = 'none';
-                input.style.width = '1px';
-                input.style.height = '1px';
-                document.body.appendChild(input);
+                // Create a temporary textarea
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                textarea.style.position = 'fixed';
+                textarea.style.opacity = '0';
+                textarea.style.pointerEvents = 'none';
+                textarea.style.width = '1px';
+                textarea.style.height = '1px';
+                textarea.style.top = '0';
+                textarea.style.left = '0';
+                document.body.appendChild(textarea);
                 
                 // Select and copy
-                input.select();
-                input.setSelectionRange(0, 99999);
+                textarea.select();
+                textarea.setSelectionRange(0, 99999);
                 
                 const success = document.execCommand('copy');
-                document.body.removeChild(input);
+                document.body.removeChild(textarea);
                 
                 if (success) {
                     showToast('✅ Link copied to clipboard!');
@@ -1622,7 +1640,7 @@
         // TOAST NOTIFICATION
         // ============================================================
         function showToast(message) {
-            // Remove existing toast if any
+            // Remove existing toast
             const existingToast = document.querySelector('.custom-toast');
             if (existingToast) {
                 existingToast.remove();
@@ -1632,7 +1650,6 @@
             toast.className = 'custom-toast';
             toast.textContent = message;
             
-            // Style the toast
             Object.assign(toast.style, {
                 position: 'fixed',
                 bottom: '30px',
@@ -1657,7 +1674,6 @@
             
             document.body.appendChild(toast);
             
-            // Auto remove after 3 seconds
             setTimeout(() => {
                 toast.style.opacity = '0';
                 setTimeout(() => {
@@ -1667,6 +1683,34 @@
                 }, 400);
             }, 3000);
         }
+
+        // ============================================================
+        // EVENT LISTENERS FOR COPY BUTTONS
+        // ============================================================
+        document.addEventListener('DOMContentLoaded', function() {
+            // Find all copy buttons
+            const copyButtons = document.querySelectorAll('.copy-link-btn');
+            console.log('🔍 Found', copyButtons.length, 'copy buttons');
+            
+            copyButtons.forEach(function(btn, index) {
+                const url = btn.getAttribute('data-url');
+                console.log(`🔗 Button ${index}:`, url);
+                
+                // Remove any existing click listeners
+                btn.removeEventListener('click', btn._copyHandler);
+                
+                // Add new click listener
+                btn._copyHandler = function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const linkUrl = this.getAttribute('data-url');
+                    console.log('🖱️ Button clicked, URL:', linkUrl);
+                    copyToClipboard(linkUrl);
+                };
+                
+                btn.addEventListener('click', btn._copyHandler);
+            });
+        });
 
         // ============================================================
         // UPDATE LIVE USER COUNT
