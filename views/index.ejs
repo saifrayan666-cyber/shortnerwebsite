@@ -7,25 +7,33 @@
     
     <!-- ===== FAVICON ===== -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔗</text></svg>">
-    <!-- Fallback PNG favicon -->
-    <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAB8UlEQVR4nO2VPU8CQRiE5xbLxNgRoiGIvwBDQViwMf6BICGB2Gq8nQ0WENuC2mmJMX6ABYnglSbt/kCwIBD5iJqL3LIPe3thTCbJ7e3szO7O3M5AKpVKpVKpVCqV6r9hfR/zgPfjX+ADH3ga9r6kMA4DoD8MCY3jNWEcBkA9Py5N45j8EF5H+L0dWk6I5wEHiZ0xj0V4BQ8xrQuAXAaTNUiRBMuFAaqhiNucOZI+ySA9PglYqHqs9Nj4MlVjXsc9XJHAUmLpMZB6XxOoDPdZ/4xNlA++e/dUZtIEmWbTGfN4sYVkg83DHRV5txNvIDxK3C9F8KCHe8hN+LLErYhZxg3zsohW6LGueC4P8UZEb2M9jBwFYPMIqWZzHmH4AIDBc0/A4il8Kz9IjK9nKb3zQae8tRshsS7rF2/ce7A6liKc4vv5/d0REggz5BJuWmRg3R4QLgH1xr5bNfYOSAB8ZmtCPg7KvYyPZ7ANQmJdtkDuv9e8qTBCkICx7ojov6GBpcSGzwrxEgJgVAohO24eN51t65cwtweAXX9CngzqLgAqAWuRMMDSHtLWc5f1z9jMC1A9hMVTANtwKKf4Hw8Z8gHYTgdu/CcF2On6OAV4D/aQSmWj/ALaK6ME+pOpoQAAAABJRU5ErkJggg==">
+    
+    <!-- ===== GOOGLE FONTS ===== -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
     
     <style>
-        /* ===== UNIQUE DESIGN SYSTEM ===== */
+        /* ============================================================ */
+        /* PREMIUM CYBERPUNK DESIGN SYSTEM */
+        /* ============================================================ */
         :root {
             --primary: #6C63FF;
-            --primary-dark: #5A52D5;
+            --primary-glow: rgba(108, 99, 255, 0.4);
             --secondary: #FF6584;
-            --accent: #00D2FF;
-            --dark: #1A1A2E;
-            --dark-light: #16213E;
-            --glass: rgba(255, 255, 255, 0.08);
-            --glass-border: rgba(255, 255, 255, 0.15);
+            --secondary-glow: rgba(255, 101, 132, 0.3);
+            --accent: #00D4FF;
+            --accent-glow: rgba(0, 212, 255, 0.3);
+            --dark: #0A0A0F;
+            --dark-card: rgba(255, 255, 255, 0.04);
+            --glass: rgba(255, 255, 255, 0.06);
+            --glass-border: rgba(255, 255, 255, 0.08);
             --text: #FFFFFF;
-            --text-muted: #B0B0C8;
+            --text-muted: rgba(255, 255, 255, 0.6);
             --telegram: #0088cc;
-            --success: #00B894;
-            --danger: #FF6B6B;
+            --success: #00FF88;
+            --danger: #FF4466;
+            --neon-blue: #00D4FF;
+            --neon-purple: #9B59FF;
+            --neon-pink: #FF6584;
         }
 
         * {
@@ -34,63 +42,163 @@
             box-sizing: border-box;
         }
 
+        html {
+            scroll-behavior: smooth;
+        }
+
         body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             background: var(--dark);
             color: var(--text);
             min-height: 100vh;
-            background-image: 
-                radial-gradient(circle at 10% 20%, rgba(108, 99, 255, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 90% 80%, rgba(255, 101, 132, 0.1) 0%, transparent 50%);
+            overflow-x: hidden;
+            position: relative;
         }
 
-        /* ===== GLASSMORPHISM CARD ===== */
+        /* ===== ANIMATED BACKGROUND PARTICLES ===== */
+        #particles-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* ===== NEON GLOW BACKGROUND ===== */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: 
+                radial-gradient(ellipse at 20% 50%, rgba(108, 99, 255, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 20%, rgba(255, 101, 132, 0.06) 0%, transparent 40%),
+                radial-gradient(ellipse at 50% 80%, rgba(0, 212, 255, 0.05) 0%, transparent 40%);
+            z-index: 0;
+            pointer-events: none;
+            animation: glowPulse 8s ease-in-out infinite alternate;
+        }
+
+        @keyframes glowPulse {
+            0% { opacity: 0.5; transform: scale(1) rotate(0deg); }
+            100% { opacity: 1; transform: scale(1.1) rotate(3deg); }
+        }
+
+        /* ===== SCROLLBAR ===== */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--dark);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, var(--primary), var(--accent));
+            border-radius: 50px;
+        }
+
+        /* ============================================================ */
+        /* GLASSMORPHISM CARDS */
+        /* ============================================================ */
         .glass-card {
             background: var(--glass);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(30px) saturate(1.2);
+            -webkit-backdrop-filter: blur(30px) saturate(1.2);
             border: 1px solid var(--glass-border);
             border-radius: 24px;
-            padding: 2rem;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            padding: 2.5rem;
+            box-shadow: 
+                0 25px 50px -12px rgba(0, 0, 0, 0.8),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            position: relative;
+            z-index: 1;
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
 
-        /* ===== NAVIGATION ===== */
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: -1px;
+            left: -1px;
+            right: -1px;
+            bottom: -1px;
+            border-radius: 24px;
+            background: linear-gradient(135deg, var(--primary-glow), transparent, var(--accent-glow));
+            z-index: -1;
+            opacity: 0.3;
+            transition: opacity 0.4s;
+        }
+
+        .glass-card:hover::before {
+            opacity: 0.6;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 
+                0 30px 60px -12px rgba(108, 99, 255, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        }
+
+        /* ============================================================ */
+        /* NAVIGATION */
+        /* ============================================================ */
         .navbar {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 1.2rem 4rem;
-            background: rgba(26, 26, 46, 0.85);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid var(--glass-border);
+            padding: 1rem 3rem;
+            background: rgba(10, 10, 15, 0.85);
+            backdrop-filter: blur(20px) saturate(1.2);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
             position: sticky;
             top: 0;
-            z-index: 100;
-            flex-wrap: wrap;
+            z-index: 1000;
             gap: 1rem;
+            flex-wrap: wrap;
         }
 
-        /* ===== LOGO WITH ICON ===== */
+        /* ===== LOGO ===== */
         .logo-wrapper {
             display: flex;
             align-items: center;
             gap: 0.8rem;
             text-decoration: none;
+            position: relative;
         }
 
         .logo-icon {
             width: 48px;
             height: 48px;
-            border-radius: 12px;
+            border-radius: 14px;
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.8rem;
-            box-shadow: 0 4px 15px rgba(108, 99, 255, 0.3);
-            flex-shrink: 0;
-            transition: transform 0.3s;
+            font-size: 1.6rem;
+            box-shadow: 0 0 30px rgba(108, 99, 255, 0.3);
+            position: relative;
+            transition: all 0.4s;
+        }
+
+        .logo-icon::after {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, var(--primary), var(--accent), var(--secondary));
+            z-index: -1;
+            opacity: 0.5;
+            filter: blur(8px);
+            animation: logoGlow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes logoGlow {
+            0% { opacity: 0.3; transform: scale(1); }
+            100% { opacity: 0.8; transform: scale(1.2); }
         }
 
         .logo-icon:hover {
@@ -103,25 +211,28 @@
         }
 
         .logo-text .brand {
-            font-size: 1.3rem;
+            font-size: 1.2rem;
             font-weight: 800;
-            background: linear-gradient(135deg, var(--primary), var(--secondary), var(--accent));
+            background: linear-gradient(135deg, var(--primary), var(--accent), var(--secondary));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             line-height: 1.2;
+            letter-spacing: -0.5px;
         }
 
         .logo-text .sub {
-            font-size: 0.65rem;
+            font-size: 0.6rem;
             color: var(--text-muted);
-            font-weight: 300;
-            letter-spacing: 1px;
+            font-weight: 400;
+            letter-spacing: 2px;
+            text-transform: uppercase;
             -webkit-text-fill-color: var(--text-muted);
         }
 
+        /* ===== NAV LINKS ===== */
         .nav-links {
             display: flex;
-            gap: 1.5rem;
+            gap: 1.2rem;
             align-items: center;
             flex-wrap: wrap;
         }
@@ -129,8 +240,26 @@
         .nav-links a {
             color: var(--text-muted);
             text-decoration: none;
-            transition: color 0.3s;
             font-weight: 500;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            position: relative;
+            padding: 0.3rem 0;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            transition: width 0.3s;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
         }
 
         .nav-links a:hover {
@@ -139,26 +268,47 @@
 
         /* ===== BUTTONS ===== */
         .btn {
-            padding: 0.5rem 1.4rem;
+            padding: 0.6rem 1.6rem;
             border: none;
             border-radius: 50px;
             font-weight: 600;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             text-decoration: none;
             display: inline-block;
+            font-family: 'Inter', sans-serif;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 50px;
+            padding: 2px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .btn:hover::before {
+            opacity: 1;
         }
 
         .btn-primary {
             background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             color: white;
-            box-shadow: 0 4px 15px rgba(108, 99, 255, 0.3);
+            box-shadow: 0 4px 25px rgba(108, 99, 255, 0.3);
         }
 
         .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(108, 99, 255, 0.4);
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 8px 40px rgba(108, 99, 255, 0.5);
         }
 
         .btn-secondary {
@@ -168,39 +318,54 @@
         }
 
         .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
         }
 
         .btn-danger {
-            background: linear-gradient(135deg, var(--danger), #EE5A24);
+            background: linear-gradient(135deg, var(--danger), #CC2244);
             color: white;
+            box-shadow: 0 4px 25px rgba(255, 68, 102, 0.3);
         }
 
         .btn-danger:hover {
-            transform: scale(1.05);
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 8px 40px rgba(255, 68, 102, 0.5);
         }
 
         .btn-success {
-            background: linear-gradient(135deg, var(--success), #00A381);
-            color: white;
+            background: linear-gradient(135deg, var(--success), #00CC66);
+            color: var(--dark);
+            box-shadow: 0 4px 25px rgba(0, 255, 136, 0.3);
         }
 
         .btn-success:hover {
-            transform: scale(1.05);
+            transform: translateY(-2px) scale(1.02);
         }
 
         .btn-telegram {
             background: linear-gradient(135deg, var(--telegram), #005f8a);
             color: white;
-            box-shadow: 0 4px 15px rgba(0, 136, 204, 0.3);
+            box-shadow: 0 4px 25px rgba(0, 136, 204, 0.3);
         }
 
         .btn-telegram:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0, 136, 204, 0.4);
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 8px 40px rgba(0, 136, 204, 0.5);
         }
 
-        /* ===== FORMS ===== */
+        .btn-glow {
+            animation: btnPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes btnPulse {
+            0%, 100% { box-shadow: 0 4px 25px rgba(108, 99, 255, 0.3); }
+            50% { box-shadow: 0 4px 50px rgba(108, 99, 255, 0.6); }
+        }
+
+        /* ============================================================ */
+        /* FORMS */
+        /* ============================================================ */
         .form-group {
             margin-bottom: 1.5rem;
         }
@@ -210,39 +375,48 @@
             margin-bottom: 0.5rem;
             color: var(--text-muted);
             font-weight: 500;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
         }
 
         .form-control {
             width: 100%;
             padding: 0.9rem 1.2rem;
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.04);
             border: 1px solid var(--glass-border);
-            border-radius: 12px;
+            border-radius: 14px;
             color: var(--text);
             font-size: 1rem;
             transition: all 0.3s;
             outline: none;
+            font-family: 'Inter', sans-serif;
         }
 
         .form-control:focus {
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.2);
-            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 0 4px rgba(108, 99, 255, 0.15), 0 0 30px rgba(108, 99, 255, 0.05);
+            background: rgba(255, 255, 255, 0.06);
         }
 
         .form-control::placeholder {
             color: var(--text-muted);
-            opacity: 0.6;
+            opacity: 0.5;
         }
 
-        /* ===== CONTAINER ===== */
+        /* ============================================================ */
+        /* CONTAINER */
+        /* ============================================================ */
         .container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 2rem;
+            position: relative;
+            z-index: 1;
         }
 
-        /* ===== DASHBOARD ===== */
+        /* ============================================================ */
+        /* DASHBOARD */
+        /* ============================================================ */
         .dashboard-header {
             display: flex;
             justify-content: space-between;
@@ -250,6 +424,14 @@
             margin-bottom: 2rem;
             flex-wrap: wrap;
             gap: 1rem;
+        }
+
+        .dashboard-header h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--text), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
         .stats-grid {
@@ -261,40 +443,89 @@
 
         .stat-card {
             background: var(--glass);
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(20px);
             border: 1px solid var(--glass-border);
-            border-radius: 16px;
-            padding: 1.5rem;
+            border-radius: 18px;
+            padding: 1.8rem 1.5rem;
             text-align: center;
+            transition: all 0.4s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(108, 99, 255, 0.05), transparent 60%);
+            animation: statGlow 6s ease-in-out infinite alternate;
+        }
+
+        @keyframes statGlow {
+            0% { transform: translate(-10%, -10%) scale(1); }
+            100% { transform: translate(10%, 10%) scale(1.2); }
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(108, 99, 255, 0.3);
         }
 
         .stat-card .number {
-            font-size: 2.5rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            font-size: 2.8rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            position: relative;
+            z-index: 1;
         }
 
         .stat-card .label {
             color: var(--text-muted);
             margin-top: 0.3rem;
+            font-size: 0.85rem;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            position: relative;
+            z-index: 1;
         }
 
-        /* ===== LINK CARDS ===== */
+        /* ============================================================ */
+        /* LINK CARDS */
+        /* ============================================================ */
         .link-card {
             background: var(--glass);
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(20px);
             border: 1px solid var(--glass-border);
-            border-radius: 16px;
-            padding: 1.5rem;
+            border-radius: 18px;
+            padding: 1.8rem;
             margin-bottom: 1rem;
-            transition: all 0.3s;
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            position: relative;
+        }
+
+        .link-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 18px;
+            background: linear-gradient(135deg, rgba(108, 99, 255, 0.03), rgba(0, 212, 255, 0.03));
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+
+        .link-card:hover::before {
+            opacity: 1;
         }
 
         .link-card:hover {
-            transform: translateY(-2px);
-            border-color: var(--primary);
+            transform: translateY(-3px);
+            border-color: rgba(108, 99, 255, 0.2);
+            box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.5);
         }
 
         .link-card .link-url {
@@ -303,22 +534,33 @@
             font-weight: 600;
             word-break: break-all;
             font-size: 1.1rem;
+            transition: color 0.3s;
+            position: relative;
+            z-index: 1;
+        }
+
+        .link-card .link-url:hover {
+            color: var(--primary);
         }
 
         .link-card .link-original {
             color: var(--text-muted);
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             word-break: break-all;
             margin-top: 0.3rem;
+            position: relative;
+            z-index: 1;
         }
 
         .link-card .link-meta {
             display: flex;
             gap: 1.5rem;
             margin-top: 0.8rem;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             color: var(--text-muted);
             flex-wrap: wrap;
+            position: relative;
+            z-index: 1;
         }
 
         .link-card .link-actions {
@@ -326,6 +568,8 @@
             gap: 0.8rem;
             margin-top: 1rem;
             flex-wrap: wrap;
+            position: relative;
+            z-index: 1;
         }
 
         .link-card .link-actions form {
@@ -336,127 +580,248 @@
         }
 
         .link-card .link-actions input[type="url"] {
-            background: rgba(255,255,255,0.05);
+            background: rgba(255,255,255,0.04);
             border: 1px solid var(--glass-border);
-            border-radius: 8px;
+            border-radius: 10px;
             padding: 0.4rem 0.8rem;
             color: var(--text);
             min-width: 200px;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s;
         }
 
         .link-card .link-actions input[type="url"]:focus {
             border-color: var(--primary);
             outline: none;
+            box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.1);
         }
 
-        /* ===== ALERTS ===== */
+        /* ============================================================ */
+        /* ALERTS */
+        /* ============================================================ */
         .alert {
             padding: 1rem 1.5rem;
-            border-radius: 12px;
+            border-radius: 14px;
             margin-bottom: 1.5rem;
             border: 1px solid;
+            backdrop-filter: blur(10px);
         }
 
         .alert-success {
-            background: rgba(0, 184, 148, 0.1);
-            border-color: var(--success);
+            background: rgba(0, 255, 136, 0.08);
+            border-color: rgba(0, 255, 136, 0.2);
             color: var(--success);
         }
 
         .alert-danger {
-            background: rgba(255, 107, 107, 0.1);
-            border-color: var(--danger);
+            background: rgba(255, 68, 102, 0.08);
+            border-color: rgba(255, 68, 102, 0.2);
             color: var(--danger);
         }
 
         .alert-info {
-            background: rgba(0, 210, 255, 0.1);
-            border-color: var(--accent);
+            background: rgba(0, 212, 255, 0.08);
+            border-color: rgba(0, 212, 255, 0.2);
             color: var(--accent);
         }
 
-        /* ===== RESPONSIVE ===== */
-        @media (max-width: 768px) {
-            .navbar {
-                flex-direction: column;
-                padding: 1rem;
-            }
-
-            .nav-links {
-                justify-content: center;
-                gap: 0.8rem;
-            }
-
-            .container {
-                padding: 1rem;
-            }
-
-            .stats-grid {
-                grid-template-columns: 1fr 1fr;
-            }
-
-            .link-card .link-actions form {
-                flex-direction: column;
-                width: 100%;
-            }
-
-            .link-card .link-actions input[type="url"] {
-                min-width: auto;
-                width: 100%;
-            }
-
-            .logo-wrapper {
-                width: 100%;
-                justify-content: center;
-            }
-        }
-
-        /* ===== ANIMATIONS ===== */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .fade-in {
-            animation: fadeIn 0.5s ease-out;
-        }
-
-        /* ===== SCROLLBAR ===== */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: var(--dark);
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: var(--primary);
+        /* ============================================================ */
+        /* LIVE USERS */
+        /* ============================================================ */
+        .live-counter {
+            background: rgba(255, 101, 132, 0.08);
+            border: 1px solid rgba(255, 101, 132, 0.15);
             border-radius: 50px;
+            padding: 0.4rem 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            color: var(--secondary);
+            font-weight: 600;
+            font-size: 0.85rem;
         }
 
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--primary-dark);
+        .live-counter .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #00FF88;
+            animation: pulse 1.5s ease-in-out infinite;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
         }
 
-        /* ===== SHORT LINK DISPLAY ===== */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.7); }
+        }
+
+        .user-list {
+            display: flex;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+            margin-top: 0.5rem;
+        }
+
+        .user-badge {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--glass-border);
+            border-radius: 50px;
+            padding: 0.3rem 1rem;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s;
+        }
+
+        .user-badge:hover {
+            border-color: var(--primary);
+            color: var(--text);
+        }
+
+        .user-badge .online-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #00FF88;
+            display: inline-block;
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+        }
+
+        /* ============================================================ */
+        /* USER PROFILE */
+        /* ============================================================ */
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            background: rgba(0, 136, 204, 0.08);
+            padding: 0.3rem 1rem 0.3rem 0.3rem;
+            border-radius: 50px;
+            border: 1px solid rgba(0, 136, 204, 0.15);
+        }
+
+        .user-profile .avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+            box-shadow: 0 0 20px rgba(108, 99, 255, 0.2);
+        }
+
+        .user-profile .name {
+            color: var(--text);
+            font-weight: 500;
+            font-size: 0.85rem;
+        }
+
+        .logout-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 0.8rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 6px;
+            transition: all 0.3s;
+        }
+
+        .logout-btn:hover {
+            color: var(--danger);
+            background: rgba(255, 68, 102, 0.1);
+        }
+
+        /* ============================================================ */
+        /* BRAND CENTER */
+        /* ============================================================ */
+        .brand-center {
+            text-align: center;
+            padding: 1rem 0 2.5rem 0;
+        }
+
+        .brand-center h1 {
+            font-size: 3.2rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--primary), var(--accent), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -1px;
+            position: relative;
+        }
+
+        .brand-center h1::after {
+            content: '✦';
+            position: absolute;
+            top: -20px;
+            right: -30px;
+            font-size: 1.5rem;
+            -webkit-text-fill-color: var(--accent);
+            animation: sparkle 3s ease-in-out infinite;
+        }
+
+        @keyframes sparkle {
+            0%, 100% { opacity: 0.3; transform: scale(0.8) rotate(0deg); }
+            50% { opacity: 1; transform: scale(1.2) rotate(180deg); }
+        }
+
+        .brand-center p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            margin-top: 0.5rem;
+            font-weight: 300;
+        }
+
+        /* ============================================================ */
+        /* SHORT LINK DISPLAY - AI SCANNING ANIMATION */
+        /* ============================================================ */
         .short-link-display {
-            background: rgba(0, 210, 255, 0.05);
-            border: 1px solid var(--accent);
-            border-radius: 12px;
-            padding: 1rem;
-            margin: 1rem 0;
+            background: rgba(0, 212, 255, 0.05);
+            border: 1px solid rgba(0, 212, 255, 0.15);
+            border-radius: 14px;
+            padding: 1.2rem 1.5rem;
+            margin: 1.2rem 0;
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
             gap: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .short-link-display::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 300%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(0, 212, 255, 0.05), 
+                rgba(108, 99, 255, 0.05), 
+                transparent
+            );
+            animation: scanLine 3s ease-in-out infinite;
+        }
+
+        @keyframes scanLine {
+            0% { transform: translateX(-33%); }
+            100% { transform: translateX(33%); }
         }
 
         .short-link-display .link {
             color: var(--accent);
             font-weight: 600;
             word-break: break-all;
+            position: relative;
+            z-index: 1;
         }
 
         .copy-btn {
@@ -467,145 +832,21 @@
             border-radius: 50px;
             cursor: pointer;
             transition: all 0.3s;
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
+            position: relative;
+            z-index: 1;
         }
 
         .copy-btn:hover {
             background: var(--primary);
             border-color: var(--primary);
+            box-shadow: 0 0 30px rgba(108, 99, 255, 0.3);
         }
 
-        /* ===== LOGIN BOX ===== */
-        .login-box {
-            max-width: 450px;
-            margin: 2rem auto;
-        }
-
-        .telegram-icon {
-            font-size: 4rem;
-            text-align: center;
-            display: block;
-            margin-bottom: 1rem;
-        }
-
-        /* ===== USER PROFILE ===== */
-        .user-profile {
-            display: flex;
-            align-items: center;
-            gap: 0.8rem;
-            background: rgba(0, 136, 204, 0.1);
-            padding: 0.4rem 1rem;
-            border-radius: 50px;
-            border: 1px solid rgba(0, 136, 204, 0.2);
-        }
-
-        .user-profile .avatar {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 0.9rem;
-        }
-
-        .user-profile .name {
-            color: var(--text);
-            font-weight: 500;
-        }
-
-        .logout-btn {
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            cursor: pointer;
-            font-size: 0.8rem;
-            padding: 0.2rem 0.5rem;
-            border-radius: 4px;
-            transition: all 0.3s;
-        }
-
-        .logout-btn:hover {
-            color: var(--danger);
-            background: rgba(255, 107, 107, 0.1);
-        }
-
-        /* ===== LIVE USERS COUNTER ===== */
-        .live-counter {
-            background: rgba(255, 101, 132, 0.1);
-            border: 1px solid rgba(255, 101, 132, 0.2);
-            border-radius: 50px;
-            padding: 0.4rem 1.2rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            color: var(--secondary);
-            font-weight: 600;
-        }
-
-        .live-counter .dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: #00ff88;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.5; transform: scale(0.8); }
-            100% { opacity: 1; transform: scale(1); }
-        }
-
-        .user-list {
-            display: flex;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-            margin-top: 0.5rem;
-        }
-
-        .user-badge {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--glass-border);
-            border-radius: 50px;
-            padding: 0.2rem 0.8rem;
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            display: flex;
-            align-items: center;
-            gap: 0.4rem;
-        }
-
-        .user-badge .online-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #00ff88;
-            display: inline-block;
-        }
-
-        /* ===== BRAND CENTER ===== */
-        .brand-center {
-            text-align: center;
-            padding: 1rem 0 2rem 0;
-        }
-
-        .brand-center h1 {
-            font-size: 2.8rem;
-            background: linear-gradient(135deg, var(--primary), var(--secondary), var(--accent));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-weight: 800;
-        }
-
-        .brand-center p {
-            color: var(--text-muted);
-            font-size: 1.1rem;
-            margin-top: 0.3rem;
-        }
-
-        /* ===== SHORTEN FORM IN DASHBOARD ===== */
+        /* ============================================================ */
+        /* SHORTEN FORM INLINE */
+        /* ============================================================ */
         .shorten-form-inline {
             display: flex;
             gap: 1rem;
@@ -628,29 +869,222 @@
             min-width: 120px;
         }
 
+        /* ============================================================ */
+        /* LOGIN BOX */
+        /* ============================================================ */
+        .login-box {
+            max-width: 450px;
+            margin: 3rem auto;
+        }
+
+        .telegram-icon {
+            font-size: 4.5rem;
+            text-align: center;
+            display: block;
+            margin-bottom: 1rem;
+            animation: floatIcon 4s ease-in-out infinite;
+        }
+
+        @keyframes floatIcon {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* ============================================================ */
+        /* FOOTER */
+        /* ============================================================ */
+        .footer {
+            text-align: center;
+            padding: 2.5rem 2rem;
+            color: var(--text-muted);
+            border-top: 1px solid var(--glass-border);
+            margin-top: 4rem;
+            background: rgba(10, 10, 15, 0.5);
+            backdrop-filter: blur(10px);
+            position: relative;
+            z-index: 1;
+        }
+
+        .footer a {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .footer a::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 1px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            transition: width 0.3s;
+        }
+
+        .footer a:hover::after {
+            width: 100%;
+        }
+
+        .footer a:hover {
+            color: var(--text);
+            text-shadow: 0 0 30px rgba(0, 212, 255, 0.3);
+        }
+
+        .footer .heart {
+            color: var(--secondary);
+            display: inline-block;
+            animation: heartBeat 1.5s ease-in-out infinite;
+        }
+
+        @keyframes heartBeat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+
+        /* ============================================================ */
+        /* RESPONSIVE */
+        /* ============================================================ */
+        @media (max-width: 992px) {
+            .brand-center h1 {
+                font-size: 2.4rem;
+            }
+        }
+
         @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                padding: 1rem 1.5rem;
+            }
+
+            .nav-links {
+                justify-content: center;
+                gap: 0.8rem;
+                width: 100%;
+                flex-wrap: wrap;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .brand-center h1 {
+                font-size: 1.8rem;
+            }
+
+            .brand-center h1::after {
+                display: none;
+            }
+
+            .dashboard-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
             .shorten-form-inline {
                 flex-direction: column;
                 align-items: stretch;
             }
+
             .shorten-form-inline .form-group {
                 min-width: auto;
             }
+
+            .link-card .link-actions form {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .link-card .link-actions input[type="url"] {
+                min-width: auto;
+                width: 100%;
+            }
+
+            .glass-card {
+                padding: 1.5rem;
+            }
+
+            .logo-wrapper {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .logo-text .brand {
+                font-size: 1rem;
+            }
         }
+
+        @media (max-width: 480px) {
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 0.8rem;
+            }
+
+            .stat-card {
+                padding: 1rem;
+            }
+
+            .stat-card .number {
+                font-size: 2rem;
+            }
+
+            .brand-center h1 {
+                font-size: 1.4rem;
+            }
+
+            .nav-links {
+                gap: 0.5rem;
+            }
+
+            .nav-links a {
+                font-size: 0.8rem;
+            }
+
+            .btn {
+                padding: 0.4rem 1rem;
+                font-size: 0.8rem;
+            }
+        }
+
+        /* ============================================================ */
+        /* FADE IN ANIMATION */
+        /* ============================================================ */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        }
+
+        .fade-in-delay-1 { animation-delay: 0.1s; }
+        .fade-in-delay-2 { animation-delay: 0.2s; }
+        .fade-in-delay-3 { animation-delay: 0.3s; }
     </style>
 </head>
 <body>
 
     <!-- ============================================================ -->
+    <!-- ANIMATED PARTICLES CANVAS -->
+    <!-- ============================================================ -->
+    <canvas id="particles-canvas"></canvas>
+
+    <!-- ============================================================ -->
     <!-- NAVIGATION -->
     <!-- ============================================================ -->
     <nav class="navbar">
-        <!-- ===== LOGO WITH ICON ===== -->
         <a href="/" class="logo-wrapper">
             <div class="logo-icon">🔗</div>
             <div class="logo-text">
                 <span class="brand">This Person Is brand Shortlink</span>
-                <span class="sub">Smart URL Shortener</span>
+                <span class="sub">✦ AI Powered URL Shortener ✦</span>
             </div>
         </a>
 
@@ -658,7 +1092,6 @@
             <a href="/">Home</a>
             <a href="/dashboard">Dashboard</a>
 
-            <!-- Live Users Counter -->
             <span class="live-counter">
                 <span class="dot"></span>
                 <span id="liveUserCount"><%= typeof onlineUsers !== 'undefined' ? onlineUsers : 0 %> Online</span>
@@ -673,7 +1106,7 @@
                     </form>
                 </div>
             <% } else { %>
-                <a href="/login" class="btn btn-telegram">🔑 Login with Telegram</a>
+                <a href="/login" class="btn btn-telegram btn-glow">🔑 Login with Telegram</a>
             <% } %>
         </div>
     </nav>
@@ -699,7 +1132,6 @@
             <div class="alert alert-info"><%= queryInfo %></div>
         <% } %>
 
-
         <!-- ========================================================== -->
         <!-- PAGE: LOGIN -->
         <!-- ========================================================== -->
@@ -707,7 +1139,9 @@
             <div class="login-box fade-in">
                 <div class="glass-card" style="text-align: center;">
                     <span class="telegram-icon">📱</span>
-                    <h1 style="font-size: 2.2rem; margin-bottom: 0.5rem;">Telegram Login</h1>
+                    <h1 style="font-size: 2.2rem; margin-bottom: 0.5rem; font-weight: 800; background: linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                        Telegram Login
+                    </h1>
                     <p style="color: var(--text-muted); margin-bottom: 2rem;">
                         Login with your Telegram ID to access all features
                     </p>
@@ -723,22 +1157,21 @@
                             <input type="text" class="form-control" id="username" name="username"
                                    placeholder="Enter your full name" required>
                         </div>
-                        <button type="submit" class="btn btn-telegram" style="width: 100%;">
+                        <button type="submit" class="btn btn-telegram btn-glow" style="width: 100%; padding: 0.9rem;">
                             🔑 Login with Telegram
                         </button>
                     </form>
 
-                    <div style="margin-top: 1.5rem; padding: 1rem; background: rgba(0, 136, 204, 0.05); border-radius: 12px;">
-                        <p style="color: var(--text-muted); font-size: 0.9rem;">
+                    <div style="margin-top: 1.5rem; padding: 1rem; background: rgba(0, 136, 204, 0.05); border-radius: 14px; border: 1px solid rgba(0, 136, 204, 0.08);">
+                        <p style="color: var(--text-muted); font-size: 0.85rem;">
                             💡 Don't have a Telegram ID? Get it from
-                            <a href="https://t.me/userinfobot" target="_blank" style="color: var(--telegram);">@userinfobot</a>
+                            <a href="https://t.me/userinfobot" target="_blank" style="color: var(--accent); text-decoration: none; font-weight: 600;">@userinfobot</a>
                             on Telegram
                         </p>
                     </div>
                 </div>
             </div>
         <% } %>
-
 
         <!-- ========================================================== -->
         <!-- PAGE: HOME -->
@@ -747,20 +1180,20 @@
             <!-- Brand Header -->
             <div class="brand-center fade-in">
                 <h1>This Person Is brand Shortlink</h1>
-                <p>Create, manage and track your short links</p>
+                <p>✦ AI-Powered URL Shortener with Real-time Analytics ✦</p>
             </div>
 
             <!-- Main Shorten Form -->
             <div class="glass-card fade-in" style="max-width: 800px; margin: 0 auto;">
-                <h1 style="font-size: 2.2rem; margin-bottom: 0.5rem;">
-                    Shorten Your <span style="background: linear-gradient(135deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Links</span>
+                <h1 style="font-size: 2rem; margin-bottom: 0.3rem; font-weight: 800;">
+                    Shorten Your <span style="background: linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Links</span>
                 </h1>
-                <p style="color: var(--text-muted); font-size: 1.1rem; margin-bottom: 2rem;">
-                    Create short, memorable links that update automatically when you change the destination.
+                <p style="color: var(--text-muted); font-size: 1rem; margin-bottom: 2rem;">
+                    Create short, memorable links that update automatically
                 </p>
 
                 <% if (typeof user !== 'undefined' && user) { %>
-                    <form action="/shorten" method="POST">
+                    <form action="/shorten" method="POST" id="shortenForm">
                         <div class="form-group">
                             <label for="originalUrl">Original URL</label>
                             <input type="url" class="form-control" id="originalUrl" name="originalUrl"
@@ -771,28 +1204,30 @@
                             <input type="text" class="form-control" id="customSlug" name="customSlug"
                                    placeholder="my-link">
                         </div>
-                        <button type="submit" class="btn btn-primary" style="width: 100%;">🚀 Create Short Link</button>
+                        <button type="submit" class="btn btn-primary btn-glow" style="width: 100%; padding: 0.9rem;" id="shortenBtn">
+                            🚀 AI Shorten Link
+                        </button>
                     </form>
 
                     <% if (typeof shortUrl !== 'undefined' && shortUrl) { %>
                         <div class="short-link-display">
-                            <span class="link"><%= shortUrl %></span>
+                            <span class="link">🔗 <%= shortUrl %></span>
                             <button class="copy-btn" onclick="copyToClipboard('<%= shortUrl %>')">📋 Copy</button>
                         </div>
                     <% } %>
                 <% } else { %>
-                    <div style="text-align: center; padding: 2rem; background: var(--glass); border-radius: 16px;">
+                    <div style="text-align: center; padding: 2.5rem; background: var(--glass); border-radius: 16px; border: 1px solid var(--glass-border);">
                         <p style="font-size: 1.2rem; margin-bottom: 1rem;">🔐 Please login with Telegram to create short links</p>
-                        <a href="/login" class="btn btn-telegram">Login with Telegram</a>
+                        <a href="/login" class="btn btn-telegram btn-glow">Login with Telegram</a>
                     </div>
                 <% } %>
             </div>
 
             <!-- Live Users -->
             <div class="glass-card fade-in" style="margin-top: 2rem;">
-                <h3>👥 Live Users</h3>
+                <h3 style="font-weight: 700;">👥 Live Users</h3>
                 <p style="color: var(--text-muted); margin-bottom: 0.5rem;">
-                    Currently <strong><%= typeof onlineUsers !== 'undefined' ? onlineUsers : 0 %></strong> users are online
+                    Currently <strong style="color: var(--accent);"><%= typeof onlineUsers !== 'undefined' ? onlineUsers : 0 %></strong> users are online
                 </p>
                 <div class="user-list" id="userList">
                     <% if (typeof onlineUserList !== 'undefined' && onlineUserList && onlineUserList.length > 0) { %>
@@ -811,23 +1246,22 @@
             <!-- Features -->
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-top: 2rem;">
                 <div class="glass-card" style="text-align: center;">
-                    <div style="font-size: 3rem;">🔄</div>
-                    <h3>Updateable Links</h3>
-                    <p style="color: var(--text-muted);">Change destination URL anytime, all short links update automatically</p>
+                    <div style="font-size: 3rem; margin-bottom: 0.5rem;">🔄</div>
+                    <h3 style="font-weight: 700;">Updateable Links</h3>
+                    <p style="color: var(--text-muted); font-size: 0.9rem;">Change destination URL anytime, all short links update automatically</p>
                 </div>
                 <div class="glass-card" style="text-align: center;">
-                    <div style="font-size: 3rem;">👀</div>
-                    <h3>Click Tracking</h3>
-                    <p style="color: var(--text-muted);">Monitor how many times your links are clicked</p>
+                    <div style="font-size: 3rem; margin-bottom: 0.5rem;">👀</div>
+                    <h3 style="font-weight: 700;">Click Tracking</h3>
+                    <p style="color: var(--text-muted); font-size: 0.9rem;">Monitor how many times your links are clicked in real-time</p>
                 </div>
                 <div class="glass-card" style="text-align: center;">
-                    <div style="font-size: 3rem;">📊</div>
-                    <h3>Live Users</h3>
-                    <p style="color: var(--text-muted);">See who's using the site in real-time</p>
+                    <div style="font-size: 3rem; margin-bottom: 0.5rem;">📊</div>
+                    <h3 style="font-weight: 700;">Live Analytics</h3>
+                    <p style="color: var(--text-muted); font-size: 0.9rem;">See who's using the site with live user tracking</p>
                 </div>
             </div>
         <% } %>
-
 
         <!-- ========================================================== -->
         <!-- PAGE: DASHBOARD -->
@@ -837,8 +1271,8 @@
 
                 <!-- Dashboard Header -->
                 <div class="dashboard-header">
-                    <h1>📊 My Dashboard</h1>
-                    <a href="/" class="btn btn-primary">+ Create New Link</a>
+                    <h1>📊 Dashboard</h1>
+                    <a href="/" class="btn btn-primary btn-glow">+ Create New Link</a>
                 </div>
 
                 <!-- Stats -->
@@ -859,7 +1293,7 @@
 
                 <!-- Quick Create Form -->
                 <div class="glass-card" style="margin-bottom: 2rem;">
-                    <h3 style="margin-bottom: 0.5rem;">🔗 Create New Short Link</h3>
+                    <h3 style="margin-bottom: 0.5rem; font-weight: 700;">🔗 Create New Short Link</h3>
                     <form action="/shorten" method="POST" class="shorten-form-inline">
                         <div class="form-group">
                             <input type="url" class="form-control" name="originalUrl"
@@ -874,7 +1308,7 @@
                 </div>
 
                 <!-- Links List -->
-                <h2 style="margin-bottom: 1.5rem;">My Short Links</h2>
+                <h2 style="margin-bottom: 1.5rem; font-weight: 700;">My Short Links</h2>
 
                 <% if (typeof links !== 'undefined' && links && links.length > 0) { %>
                     <% links.forEach(function(link) { %>
@@ -891,16 +1325,14 @@
                                 <span>🆔 <%= link.shortCode %></span>
                             </div>
                             <div class="link-actions">
-                                <!-- Update Form -->
                                 <form action="/update-link/<%= link.id %>" method="POST">
                                     <input type="url" name="newUrl" placeholder="Enter new URL" required>
-                                    <button type="submit" class="btn btn-primary" style="padding: 0.3rem 1rem;">
+                                    <button type="submit" class="btn btn-primary" style="padding: 0.3rem 1.2rem;">
                                         🔄 Update
                                     </button>
                                 </form>
-                                <!-- Delete Form -->
                                 <form action="/delete-link/<%= link.id %>" method="POST" style="display: inline;">
-                                    <button type="submit" class="btn btn-danger" style="padding: 0.3rem 1rem;"
+                                    <button type="submit" class="btn btn-danger" style="padding: 0.3rem 1.2rem;"
                                             onclick="return confirm('Are you sure you want to delete this link?')">
                                         🗑️ Delete
                                     </button>
@@ -909,9 +1341,9 @@
                         </div>
                     <% }); %>
                 <% } else { %>
-                    <div class="glass-card" style="text-align: center; padding: 3rem;">
+                    <div class="glass-card" style="text-align: center; padding: 3.5rem;">
                         <p style="color: var(--text-muted); font-size: 1.2rem;">You haven't created any links yet</p>
-                        <p style="color: var(--text-muted); margin-top: 0.5rem;">
+                        <p style="color: var(--text-muted); margin-top: 0.5rem; font-size: 0.9rem;">
                             Use the form above to create your first short link!
                         </p>
                     </div>
@@ -923,25 +1355,140 @@
     </div>
     <!-- ===== END CONTAINER ===== -->
 
-
     <!-- ============================================================ -->
     <!-- FOOTER -->
     <!-- ============================================================ -->
-    <footer style="text-align: center; padding: 2rem; color: var(--text-muted); border-top: 1px solid var(--glass-border); margin-top: 4rem;">
-        <p>🔗 This Person Is brand Shortlink &bull; Built with ❤️ &bull; Powered by @thispersonisbrand537</p>
-        <p style="font-size: 0.8rem; margin-top: 0.5rem;">© 2026 All rights reserved</p>
+    <footer class="footer">
+        <p>
+            🔗 This Person Is brand Shortlink &bull; 
+            <span class="heart">❤️</span> &bull; 
+            Powered by 
+            <a href="https://t.me/thispersonisbrand537" target="_blank" rel="noopener noreferrer">
+                @thispersonisbrand537
+            </a>
+        </p>
+        <p style="font-size: 0.75rem; margin-top: 0.5rem; opacity: 0.5;">
+            © 2026 All rights reserved
+        </p>
     </footer>
-
 
     <!-- ============================================================ -->
     <!-- SCRIPTS -->
     <!-- ============================================================ -->
     <script>
-        // Copy to clipboard
+        // ============================================================
+        // ANIMATED PARTICLES
+        // ============================================================
+        (function() {
+            const canvas = document.getElementById('particles-canvas');
+            const ctx = canvas.getContext('2d');
+            let particles = [];
+            let mouseX = 0;
+            let mouseY = 0;
+
+            function resizeCanvas() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+
+            class Particle {
+                constructor() {
+                    this.x = Math.random() * canvas.width;
+                    this.y = Math.random() * canvas.height;
+                    this.size = Math.random() * 2 + 0.5;
+                    this.speedX = (Math.random() - 0.5) * 0.5;
+                    this.speedY = (Math.random() - 0.5) * 0.5;
+                    this.opacity = Math.random() * 0.5 + 0.2;
+                    this.color = `rgba(108, 99, 255, ${this.opacity})`;
+                }
+
+                update() {
+                    this.x += this.speedX;
+                    this.y += this.speedY;
+
+                    // Mouse interaction
+                    const dx = mouseX - this.x;
+                    const dy = mouseY - this.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < 150) {
+                        const force = (150 - dist) / 150 * 0.02;
+                        this.x -= dx * force;
+                        this.y -= dy * force;
+                    }
+
+                    if (this.x > canvas.width) this.x = 0;
+                    if (this.x < 0) this.x = canvas.width;
+                    if (this.y > canvas.height) this.y = 0;
+                    if (this.y < 0) this.y = canvas.height;
+                }
+
+                draw() {
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fillStyle = this.color;
+                    ctx.fill();
+                }
+            }
+
+            function initParticles() {
+                const count = Math.min(100, Math.floor((canvas.width * canvas.height) / 10000));
+                particles = [];
+                for (let i = 0; i < count; i++) {
+                    particles.push(new Particle());
+                }
+            }
+            initParticles();
+
+            function drawConnections() {
+                for (let i = 0; i < particles.length; i++) {
+                    for (let j = i + 1; j < particles.length; j++) {
+                        const dx = particles[i].x - particles[j].x;
+                        const dy = particles[i].y - particles[j].y;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+                        if (dist < 120) {
+                            ctx.beginPath();
+                            ctx.strokeStyle = `rgba(108, 99, 255, ${0.08 * (1 - dist / 120)})`;
+                            ctx.lineWidth = 0.5;
+                            ctx.moveTo(particles[i].x, particles[i].y);
+                            ctx.lineTo(particles[j].x, particles[j].y);
+                            ctx.stroke();
+                        }
+                    }
+                }
+            }
+
+            function animateParticles() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                particles.forEach(p => {
+                    p.update();
+                    p.draw();
+                });
+                drawConnections();
+                requestAnimationFrame(animateParticles);
+            }
+            animateParticles();
+
+            document.addEventListener('mousemove', (e) => {
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+            });
+
+            // Resize handler for particles
+            window.addEventListener('resize', () => {
+                resizeCanvas();
+                initParticles();
+            });
+        })();
+
+        // ============================================================
+        // COPY TO CLIPBOARD
+        // ============================================================
         function copyToClipboard(text) {
             if (navigator.clipboard && navigator.clipboard.writeText) {
                 navigator.clipboard.writeText(text).then(() => {
-                    alert('✅ Link copied to clipboard!');
+                    showToast('✅ Link copied to clipboard!');
                 }).catch(() => {
                     fallbackCopy(text);
                 });
@@ -957,10 +1504,45 @@
             input.select();
             document.execCommand('copy');
             document.body.removeChild(input);
-            alert('✅ Link copied to clipboard!');
+            showToast('✅ Link copied to clipboard!');
         }
 
-        // Update live user count every 10 seconds
+        // ============================================================
+        // TOAST NOTIFICATION
+        // ============================================================
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.textContent = message;
+            Object.assign(toast.style, {
+                position: 'fixed',
+                bottom: '30px',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                background: 'rgba(10,10,15,0.9)',
+                backdropFilter: 'blur(20px)',
+                color: '#fff',
+                padding: '1rem 2rem',
+                borderRadius: '14px',
+                border: '1px solid rgba(255,255,255,0.08)',
+                boxShadow: '0 20px 40px -12px rgba(0,0,0,0.8), 0 0 30px rgba(108,99,255,0.1)',
+                zIndex: '9999',
+                fontFamily: 'Inter, sans-serif',
+                fontWeight: '500',
+                animation: 'fadeIn 0.4s ease',
+                maxWidth: '90%',
+                textAlign: 'center'
+            });
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transition = 'opacity 0.4s';
+                setTimeout(() => toast.remove(), 400);
+            }, 3000);
+        }
+
+        // ============================================================
+        // UPDATE LIVE USER COUNT
+        // ============================================================
         setInterval(async () => {
             try {
                 const response = await fetch('/api/online-users');
@@ -981,10 +1563,32 @@
                         listEl.innerHTML = '<span style="color: var(--text-muted);">No users online</span>';
                     }
                 }
-            } catch (e) {
-                // Silent fail
-            }
+            } catch (e) {}
         }, 10000);
+
+        // ============================================================
+        // AI SCANNING ANIMATION ON FORM SUBMIT
+        // ============================================================
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('shortenForm');
+            const btn = document.getElementById('shortenBtn');
+            
+            if (form && btn) {
+                form.addEventListener('submit', function() {
+                    const originalText = btn.innerHTML;
+                    btn.innerHTML = '🔮 AI Scanning...';
+                    btn.disabled = true;
+                    btn.style.opacity = '0.7';
+                    
+                    // Reset after 3 seconds (or when page reloads)
+                    setTimeout(() => {
+                        btn.innerHTML = originalText;
+                        btn.disabled = false;
+                        btn.style.opacity = '1';
+                    }, 3000);
+                });
+            }
+        });
     </script>
 
 </body>
