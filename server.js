@@ -9,12 +9,15 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
 
+// ============ Setup Views ============
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
+
 // ============ SQLite Database Setup ============
 const db = new sqlite3.Database('./database.db');
 
 // Create tables
 db.serialize(() => {
-    // Users table
     db.run(`CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         telegramId TEXT UNIQUE,
@@ -24,7 +27,6 @@ db.serialize(() => {
         isOnline INTEGER DEFAULT 0
     )`);
 
-    // Links table
     db.run(`CREATE TABLE IF NOT EXISTS links (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         shortCode TEXT UNIQUE,
@@ -37,15 +39,12 @@ db.serialize(() => {
     )`);
 });
 
-console.log('✅ SQLite database created successfully!');
+console.log('✅ SQLite database ready!');
 
 // ============ Middleware ============
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
-
-app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));
 
 app.use(session({
     secret: process.env.SESSION_SECRET || crypto.randomBytes(32).toString('hex'),
@@ -157,7 +156,6 @@ app.get('/dashboard', (req, res) => {
 
             const totalClicks = links.reduce((sum, link) => sum + link.clicks, 0);
             
-            // Get user's links with shortUrl
             const linksWithUrl = links.map(link => ({
                 ...link,
                 shortUrl: `${BASE_URL}/${link.shortCode}`
@@ -274,6 +272,6 @@ app.get('/api/online-users', (req, res) => {
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Server running on port ${PORT}`);
     console.log(`🔗 Base URL: ${BASE_URL}`);
-    console.log(`📦 Database: SQLite (No MongoDB needed)`);
+    console.log(`📦 Database: SQLite`);
     console.log(`✅ Ready to use!`);
 });
