@@ -1,7 +1,7 @@
 {
   "name": "shortlink-pro",
   "version": "1.0.0",
-  "description": "Smart URL shortener with Telegram login",
+  "description": "This Person Is brand Shortlink",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
