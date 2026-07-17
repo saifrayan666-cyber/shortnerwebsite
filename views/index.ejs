@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>This Person Is brand Shortlink</title>
     <style>
-        /* Unique Design System */
+        /* ===== UNIQUE DESIGN SYSTEM ===== */
         :root {
             --primary: #6C63FF;
             --primary-dark: #5A52D5;
@@ -13,11 +13,13 @@
             --accent: #00D2FF;
             --dark: #1A1A2E;
             --dark-light: #16213E;
-            --glass: rgba(255, 255, 255, 0.1);
-            --glass-border: rgba(255, 255, 255, 0.2);
+            --glass: rgba(255, 255, 255, 0.08);
+            --glass-border: rgba(255, 255, 255, 0.15);
             --text: #FFFFFF;
             --text-muted: #B0B0C8;
             --telegram: #0088cc;
+            --success: #00B894;
+            --danger: #FF6B6B;
         }
 
         * {
@@ -36,7 +38,7 @@
                 radial-gradient(circle at 90% 80%, rgba(255, 101, 132, 0.1) 0%, transparent 50%);
         }
 
-        /* Glassmorphism Card */
+        /* ===== GLASSMORPHISM CARD ===== */
         .glass-card {
             background: var(--glass);
             backdrop-filter: blur(20px);
@@ -47,40 +49,46 @@
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
 
-        /* Navigation */
+        /* ===== NAVIGATION ===== */
         .navbar {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 1.5rem 4rem;
-            background: rgba(26, 26, 46, 0.8);
+            padding: 1.2rem 4rem;
+            background: rgba(26, 26, 46, 0.85);
             backdrop-filter: blur(10px);
             border-bottom: 1px solid var(--glass-border);
             position: sticky;
             top: 0;
             z-index: 100;
+            flex-wrap: wrap;
+            gap: 1rem;
         }
 
         .logo {
-            font-size: 1.5rem;
+            font-size: 1.4rem;
             font-weight: 800;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
             text-decoration: none;
         }
 
-        .logo span {
-            font-size: 0.8rem;
+        .logo .brand {
+            background: linear-gradient(135deg, var(--primary), var(--secondary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo .sub {
+            font-size: 0.7rem;
             display: block;
             color: var(--text-muted);
             -webkit-text-fill-color: var(--text-muted);
             font-weight: 300;
+            letter-spacing: 1px;
         }
 
         .nav-links {
             display: flex;
-            gap: 2rem;
+            gap: 1.5rem;
             align-items: center;
             flex-wrap: wrap;
         }
@@ -96,8 +104,9 @@
             color: var(--text);
         }
 
-        .nav-links .btn {
-            padding: 0.5rem 1.2rem;
+        /* ===== BUTTONS ===== */
+        .btn {
+            padding: 0.5rem 1.4rem;
             border: none;
             border-radius: 50px;
             font-weight: 600;
@@ -126,21 +135,29 @@
         }
 
         .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.15);
         }
 
         .btn-danger {
-            background: linear-gradient(135deg, #FF6B6B, #EE5A24);
+            background: linear-gradient(135deg, var(--danger), #EE5A24);
             color: white;
+        }
+
+        .btn-danger:hover {
+            transform: scale(1.05);
         }
 
         .btn-success {
-            background: linear-gradient(135deg, #00B894, #00A381);
+            background: linear-gradient(135deg, var(--success), #00A381);
             color: white;
         }
 
+        .btn-success:hover {
+            transform: scale(1.05);
+        }
+
         .btn-telegram {
-            background: linear-gradient(135deg, #0088cc, #005f8a);
+            background: linear-gradient(135deg, var(--telegram), #005f8a);
             color: white;
             box-shadow: 0 4px 15px rgba(0, 136, 204, 0.3);
         }
@@ -150,7 +167,7 @@
             box-shadow: 0 8px 25px rgba(0, 136, 204, 0.4);
         }
 
-        /* Forms */
+        /* ===== FORMS ===== */
         .form-group {
             margin-bottom: 1.5rem;
         }
@@ -185,14 +202,14 @@
             opacity: 0.6;
         }
 
-        /* Container */
+        /* ===== CONTAINER ===== */
         .container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 2rem;
         }
 
-        /* Dashboard */
+        /* ===== DASHBOARD ===== */
         .dashboard-header {
             display: flex;
             justify-content: space-between;
@@ -204,7 +221,7 @@
 
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             gap: 1.5rem;
             margin-bottom: 2.5rem;
         }
@@ -231,7 +248,7 @@
             margin-top: 0.3rem;
         }
 
-        /* Link Cards */
+        /* ===== LINK CARDS ===== */
         .link-card {
             background: var(--glass);
             backdrop-filter: blur(10px);
@@ -299,7 +316,7 @@
             outline: none;
         }
 
-        /* Alert Messages */
+        /* ===== ALERTS ===== */
         .alert {
             padding: 1rem 1.5rem;
             border-radius: 12px;
@@ -309,28 +326,27 @@
 
         .alert-success {
             background: rgba(0, 184, 148, 0.1);
-            border-color: #00B894;
-            color: #00B894;
+            border-color: var(--success);
+            color: var(--success);
         }
 
         .alert-danger {
             background: rgba(255, 107, 107, 0.1);
-            border-color: #FF6B6B;
-            color: #FF6B6B;
+            border-color: var(--danger);
+            color: var(--danger);
         }
 
         .alert-info {
             background: rgba(0, 210, 255, 0.1);
-            border-color: #00D2FF;
-            color: #00D2FF;
+            border-color: var(--accent);
+            color: var(--accent);
         }
 
-        /* Responsive */
+        /* ===== RESPONSIVE ===== */
         @media (max-width: 768px) {
             .navbar {
                 flex-direction: column;
                 padding: 1rem;
-                gap: 1rem;
             }
 
             .nav-links {
@@ -357,7 +373,7 @@
             }
         }
 
-        /* Animations */
+        /* ===== ANIMATIONS ===== */
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
@@ -367,7 +383,7 @@
             animation: fadeIn 0.5s ease-out;
         }
 
-        /* Custom Scrollbar */
+        /* ===== SCROLLBAR ===== */
         ::-webkit-scrollbar {
             width: 8px;
         }
@@ -381,7 +397,11 @@
             border-radius: 50px;
         }
 
-        /* Short Link Display */
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-dark);
+        }
+
+        /* ===== SHORT LINK DISPLAY ===== */
         .short-link-display {
             background: rgba(0, 210, 255, 0.05);
             border: 1px solid var(--accent);
@@ -416,7 +436,7 @@
             border-color: var(--primary);
         }
 
-        /* Login Box */
+        /* ===== LOGIN BOX ===== */
         .login-box {
             max-width: 450px;
             margin: 2rem auto;
@@ -429,7 +449,7 @@
             margin-bottom: 1rem;
         }
 
-        /* User Profile */
+        /* ===== USER PROFILE ===== */
         .user-profile {
             display: flex;
             align-items: center;
@@ -469,11 +489,11 @@
         }
 
         .logout-btn:hover {
-            color: #FF6B6B;
+            color: var(--danger);
             background: rgba(255, 107, 107, 0.1);
         }
 
-        /* Live Users Counter */
+        /* ===== LIVE USERS COUNTER ===== */
         .live-counter {
             background: rgba(255, 101, 132, 0.1);
             border: 1px solid rgba(255, 101, 132, 0.2);
@@ -527,14 +547,14 @@
             display: inline-block;
         }
 
-        /* Brand Name in Center */
+        /* ===== BRAND CENTER ===== */
         .brand-center {
             text-align: center;
-            padding: 1rem 0;
+            padding: 1rem 0 2rem 0;
         }
 
         .brand-center h1 {
-            font-size: 2.5rem;
+            font-size: 2.8rem;
             background: linear-gradient(135deg, var(--primary), var(--secondary), var(--accent));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -544,20 +564,57 @@
         .brand-center p {
             color: var(--text-muted);
             font-size: 1.1rem;
+            margin-top: 0.3rem;
+        }
+
+        /* ===== SHORTEN FORM IN DASHBOARD ===== */
+        .shorten-form-inline {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            align-items: flex-end;
+        }
+
+        .shorten-form-inline .form-group {
+            flex: 1;
+            min-width: 150px;
+            margin-bottom: 0;
+        }
+
+        .shorten-form-inline .form-group .form-control {
+            padding: 0.7rem 1rem;
+        }
+
+        .shorten-form-inline .btn {
+            padding: 0.7rem 1.8rem;
+            min-width: 120px;
+        }
+
+        @media (max-width: 768px) {
+            .shorten-form-inline {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .shorten-form-inline .form-group {
+                min-width: auto;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- Navigation -->
+
+    <!-- ============================================================ -->
+    <!-- NAVIGATION -->
+    <!-- ============================================================ -->
     <nav class="navbar">
         <a href="/" class="logo">
-            🔗 This Person Is brand Shortlink
-            <span>Smart URL Shortener</span>
+            <span class="brand">🔗 This Person Is brand Shortlink</span>
+            <span class="sub">Smart URL Shortener</span>
         </a>
         <div class="nav-links">
             <a href="/">Home</a>
             <a href="/dashboard">Dashboard</a>
-            
+
             <!-- Live Users Counter -->
             <span class="live-counter">
                 <span class="dot"></span>
@@ -569,7 +626,7 @@
                     <div class="avatar"><%= user.name.charAt(0) %></div>
                     <span class="name"><%= user.name %></span>
                     <form action="/logout" method="POST" style="display: inline;">
-                        <button type="submit" class="logout-btn">✕</button>
+                        <button type="submit" class="logout-btn" title="Logout">✕</button>
                     </form>
                 </div>
             <% } else { %>
@@ -578,43 +635,60 @@
         </div>
     </nav>
 
-    <!-- Main Content -->
+    <!-- ============================================================ -->
+    <!-- MAIN CONTENT -->
+    <!-- ============================================================ -->
     <div class="container">
-        <% if (typeof error !== 'undefined' && error) { %>
-            <div class="alert alert-danger"><%= error %></div>
+
+        <!-- ===== ALERTS ===== -->
+        <% 
+            // Get error/success from query params (for dashboard redirects)
+            const queryError = typeof error !== 'undefined' ? error : null;
+            const querySuccess = typeof success !== 'undefined' ? success : null;
+            const queryInfo = typeof info !== 'undefined' ? info : null;
+        %>
+        <% if (queryError) { %>
+            <div class="alert alert-danger"><%= queryError %></div>
         <% } %>
-        <% if (typeof success !== 'undefined' && success) { %>
-            <div class="alert alert-success"><%= success %></div>
+        <% if (querySuccess) { %>
+            <div class="alert alert-success"><%= querySuccess %></div>
         <% } %>
-        <% if (typeof info !== 'undefined' && info) { %>
-            <div class="alert alert-info"><%= info %></div>
+        <% if (queryInfo) { %>
+            <div class="alert alert-info"><%= queryInfo %></div>
         <% } %>
 
-        <!-- Login Page -->
+
+        <!-- ========================================================== -->
+        <!-- PAGE: LOGIN -->
+        <!-- ========================================================== -->
         <% if (page === 'login') { %>
             <div class="login-box fade-in">
                 <div class="glass-card" style="text-align: center;">
                     <span class="telegram-icon">📱</span>
                     <h1 style="font-size: 2.2rem; margin-bottom: 0.5rem;">Telegram Login</h1>
-                    <p style="color: var(--text-muted); margin-bottom: 2rem;">Login with your Telegram ID to access all features</p>
-                    
+                    <p style="color: var(--text-muted); margin-bottom: 2rem;">
+                        Login with your Telegram ID to access all features
+                    </p>
+
                     <form action="/login" method="POST">
                         <div class="form-group">
                             <label for="telegramId">Telegram ID</label>
-                            <input type="text" class="form-control" id="telegramId" name="telegramId" placeholder="Enter your Telegram ID (e.g., 123456789)" required>
+                            <input type="text" class="form-control" id="telegramId" name="telegramId"
+                                   placeholder="Enter your Telegram ID (e.g., 123456789)" required>
                         </div>
                         <div class="form-group">
                             <label for="username">Your Name</label>
-                            <input type="text" class="form-control" id="username" name="username" placeholder="Enter your full name" required>
+                            <input type="text" class="form-control" id="username" name="username"
+                                   placeholder="Enter your full name" required>
                         </div>
                         <button type="submit" class="btn btn-telegram" style="width: 100%;">
                             🔑 Login with Telegram
                         </button>
                     </form>
-                    
+
                     <div style="margin-top: 1.5rem; padding: 1rem; background: rgba(0, 136, 204, 0.05); border-radius: 12px;">
                         <p style="color: var(--text-muted); font-size: 0.9rem;">
-                            💡 Don't have a Telegram ID? Get it from 
+                            💡 Don't have a Telegram ID? Get it from
                             <a href="https://t.me/userinfobot" target="_blank" style="color: var(--telegram);">@userinfobot</a>
                             on Telegram
                         </p>
@@ -623,13 +697,18 @@
             </div>
         <% } %>
 
-        <!-- Home Page -->
+
+        <!-- ========================================================== -->
+        <!-- PAGE: HOME -->
+        <!-- ========================================================== -->
         <% if (page === 'home') { %>
+            <!-- Brand Header -->
             <div class="brand-center fade-in">
                 <h1>This Person Is brand Shortlink</h1>
                 <p>Create, manage and track your short links</p>
             </div>
 
+            <!-- Main Shorten Form -->
             <div class="glass-card fade-in" style="max-width: 800px; margin: 0 auto;">
                 <h1 style="font-size: 2.2rem; margin-bottom: 0.5rem;">
                     Shorten Your <span style="background: linear-gradient(135deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Links</span>
@@ -642,11 +721,13 @@
                     <form action="/shorten" method="POST">
                         <div class="form-group">
                             <label for="originalUrl">Original URL</label>
-                            <input type="url" class="form-control" id="originalUrl" name="originalUrl" placeholder="https://example.com/very-long-url" required>
+                            <input type="url" class="form-control" id="originalUrl" name="originalUrl"
+                                   placeholder="https://example.com/very-long-url" required>
                         </div>
                         <div class="form-group">
                             <label for="customSlug">Custom Slug (Optional)</label>
-                            <input type="text" class="form-control" id="customSlug" name="customSlug" placeholder="my-link">
+                            <input type="text" class="form-control" id="customSlug" name="customSlug"
+                                   placeholder="my-link">
                         </div>
                         <button type="submit" class="btn btn-primary" style="width: 100%;">🚀 Create Short Link</button>
                     </form>
@@ -665,16 +746,18 @@
                 <% } %>
             </div>
 
-            <!-- Live Users Section -->
+            <!-- Live Users -->
             <div class="glass-card fade-in" style="margin-top: 2rem;">
                 <h3>👥 Live Users</h3>
-                <p style="color: var(--text-muted); margin-bottom: 0.5rem;">Currently <strong><%= typeof onlineUsers !== 'undefined' ? onlineUsers : 0 %></strong> users are online</p>
+                <p style="color: var(--text-muted); margin-bottom: 0.5rem;">
+                    Currently <strong><%= typeof onlineUsers !== 'undefined' ? onlineUsers : 0 %></strong> users are online
+                </p>
                 <div class="user-list" id="userList">
                     <% if (typeof onlineUserList !== 'undefined' && onlineUserList && onlineUserList.length > 0) { %>
-                        <% onlineUserList.forEach(function(user) { %>
+                        <% onlineUserList.forEach(function(u) { %>
                             <span class="user-badge">
                                 <span class="online-dot"></span>
-                                <%= user.name %>
+                                <%= u.name %>
                             </span>
                         <% }); %>
                     <% } else { %>
@@ -703,14 +786,20 @@
             </div>
         <% } %>
 
-        <!-- Dashboard -->
+
+        <!-- ========================================================== -->
+        <!-- PAGE: DASHBOARD -->
+        <!-- ========================================================== -->
         <% if (page === 'dashboard') { %>
             <div class="fade-in">
+
+                <!-- Dashboard Header -->
                 <div class="dashboard-header">
                     <h1>📊 My Dashboard</h1>
                     <a href="/" class="btn btn-primary">+ Create New Link</a>
                 </div>
 
+                <!-- Stats -->
                 <div class="stats-grid">
                     <div class="stat-card">
                         <div class="number"><%= typeof links !== 'undefined' && links ? links.length : 0 %></div>
@@ -726,12 +815,32 @@
                     </div>
                 </div>
 
+                <!-- Quick Create Form -->
+                <div class="glass-card" style="margin-bottom: 2rem;">
+                    <h3 style="margin-bottom: 0.5rem;">🔗 Create New Short Link</h3>
+                    <form action="/shorten" method="POST" class="shorten-form-inline">
+                        <div class="form-group">
+                            <input type="url" class="form-control" name="originalUrl"
+                                   placeholder="Enter your long URL" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="text" class="form-control" name="customSlug"
+                                   placeholder="Custom slug (optional)">
+                        </div>
+                        <button type="submit" class="btn btn-primary">🚀 Shorten</button>
+                    </form>
+                </div>
+
+                <!-- Links List -->
                 <h2 style="margin-bottom: 1.5rem;">My Short Links</h2>
+
                 <% if (typeof links !== 'undefined' && links && links.length > 0) { %>
                     <% links.forEach(function(link) { %>
                         <div class="link-card">
                             <div>
-                                <a href="/<%= link.shortCode %>" target="_blank" class="link-url">🔗 <%= link.shortUrl %></a>
+                                <a href="/<%= link.shortCode %>" target="_blank" class="link-url">
+                                    🔗 <%= link.shortUrl %>
+                                </a>
                             </div>
                             <div class="link-original">→ <%= link.originalUrl %></div>
                             <div class="link-meta">
@@ -740,12 +849,19 @@
                                 <span>🆔 <%= link.shortCode %></span>
                             </div>
                             <div class="link-actions">
+                                <!-- Update Form -->
                                 <form action="/update-link/<%= link.id %>" method="POST">
                                     <input type="url" name="newUrl" placeholder="Enter new URL" required>
-                                    <button type="submit" class="btn btn-primary" style="padding: 0.3rem 1rem;">🔄 Update</button>
+                                    <button type="submit" class="btn btn-primary" style="padding: 0.3rem 1rem;">
+                                        🔄 Update
+                                    </button>
                                 </form>
+                                <!-- Delete Form -->
                                 <form action="/delete-link/<%= link.id %>" method="POST" style="display: inline;">
-                                    <button type="submit" class="btn btn-danger" style="padding: 0.3rem 1rem;" onclick="return confirm('Are you sure you want to delete this link?')">🗑️ Delete</button>
+                                    <button type="submit" class="btn btn-danger" style="padding: 0.3rem 1rem;"
+                                            onclick="return confirm('Are you sure you want to delete this link?')">
+                                        🗑️ Delete
+                                    </button>
                                 </form>
                             </div>
                         </div>
@@ -753,32 +869,53 @@
                 <% } else { %>
                     <div class="glass-card" style="text-align: center; padding: 3rem;">
                         <p style="color: var(--text-muted); font-size: 1.2rem;">You haven't created any links yet</p>
-                        <a href="/" class="btn btn-primary" style="margin-top: 1rem;">✨ Create Your First Link</a>
+                        <p style="color: var(--text-muted); margin-top: 0.5rem;">
+                            Use the form above to create your first short link!
+                        </p>
                     </div>
                 <% } %>
+
             </div>
         <% } %>
-    </div>
 
-    <!-- Footer -->
+    </div>
+    <!-- ===== END CONTAINER ===== -->
+
+
+    <!-- ============================================================ -->
+    <!-- FOOTER -->
+    <!-- ============================================================ -->
     <footer style="text-align: center; padding: 2rem; color: var(--text-muted); border-top: 1px solid var(--glass-border); margin-top: 4rem;">
         <p>🔗 This Person Is brand Shortlink &bull; Built with ❤️ &bull; Powered by Telegram</p>
         <p style="font-size: 0.8rem; margin-top: 0.5rem;">© 2026 All rights reserved</p>
     </footer>
 
+
+    <!-- ============================================================ -->
+    <!-- SCRIPTS -->
+    <!-- ============================================================ -->
     <script>
+        // Copy to clipboard
         function copyToClipboard(text) {
-            navigator.clipboard.writeText(text).then(() => {
-                alert('Link copied to clipboard!');
-            }).catch(() => {
-                const input = document.createElement('input');
-                input.value = text;
-                document.body.appendChild(input);
-                input.select();
-                document.execCommand('copy');
-                document.body.removeChild(input);
-                alert('Link copied to clipboard!');
-            });
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(() => {
+                    alert('✅ Link copied to clipboard!');
+                }).catch(() => {
+                    fallbackCopy(text);
+                });
+            } else {
+                fallbackCopy(text);
+            }
+        }
+
+        function fallbackCopy(text) {
+            const input = document.createElement('input');
+            input.value = text;
+            document.body.appendChild(input);
+            input.select();
+            document.execCommand('copy');
+            document.body.removeChild(input);
+            alert('✅ Link copied to clipboard!');
         }
 
         // Update live user count every 10 seconds
@@ -786,26 +923,27 @@
             try {
                 const response = await fetch('/api/online-users');
                 const data = await response.json();
-                
+
                 const countEl = document.getElementById('liveUserCount');
                 if (countEl) {
                     countEl.textContent = (data.count || 0) + ' Online';
                 }
-                
+
                 const listEl = document.getElementById('userList');
                 if (listEl && data.users) {
                     if (data.users.length > 0) {
-                        listEl.innerHTML = data.users.map(user => 
-                            `<span class="user-badge"><span class="online-dot"></span>${user.name}</span>`
+                        listEl.innerHTML = data.users.map(u =>
+                            `<span class="user-badge"><span class="online-dot"></span>${u.name}</span>`
                         ).join('');
                     } else {
                         listEl.innerHTML = '<span style="color: var(--text-muted);">No users online</span>';
                     }
                 }
             } catch (e) {
-                console.error('Failed to update user count:', e);
+                // Silent fail - no need to spam console
             }
         }, 10000);
     </script>
+
 </body>
 </html>
