@@ -778,7 +778,7 @@
         }
 
         /* ============================================================ */
-        /* SHORT LINK DISPLAY - AI SCANNING ANIMATION */
+        /* SHORT LINK DISPLAY - SCANNING ANIMATION */
         /* ============================================================ */
         .short-link-display {
             background: rgba(0, 212, 255, 0.05);
@@ -1084,7 +1084,7 @@
             <div class="logo-icon">🔗</div>
             <div class="logo-text">
                 <span class="brand">This Person Is brand Shortlink</span>
-                <span class="sub">✦ AI Powered URL Shortener ✦</span>
+                <span class="sub">✦ Smart URL Shortener ✦</span>
             </div>
         </a>
 
@@ -1180,7 +1180,7 @@
             <!-- Brand Header -->
             <div class="brand-center fade-in">
                 <h1>This Person Is brand Shortlink</h1>
-                <p>✦ AI-Powered URL Shortener with Real-time Analytics ✦</p>
+                <p>✦ Smart URL Shortener with Real-time Analytics ✦</p>
             </div>
 
             <!-- Main Shorten Form -->
@@ -1205,7 +1205,7 @@
                                    placeholder="my-link">
                         </div>
                         <button type="submit" class="btn btn-primary btn-glow" style="width: 100%; padding: 0.9rem;" id="shortenBtn">
-                            🚀 AI Shorten Link
+                            🚀 Shorten Link
                         </button>
                     </form>
 
@@ -1408,7 +1408,6 @@
                     this.x += this.speedX;
                     this.y += this.speedY;
 
-                    // Mouse interaction
                     const dx = mouseX - this.x;
                     const dy = mouseY - this.y;
                     const dist = Math.sqrt(dx * dx + dy * dy);
@@ -1475,7 +1474,6 @@
                 mouseY = e.clientY;
             });
 
-            // Resize handler for particles
             window.addEventListener('resize', () => {
                 resizeCanvas();
                 initParticles();
@@ -1567,7 +1565,7 @@
         }, 10000);
 
         // ============================================================
-        // AI SCANNING ANIMATION ON FORM SUBMIT
+        // SCANNING ANIMATION ON FORM SUBMIT
         // ============================================================
         document.addEventListener('DOMContentLoaded', function() {
             const form = document.getElementById('shortenForm');
@@ -1576,11 +1574,10 @@
             if (form && btn) {
                 form.addEventListener('submit', function() {
                     const originalText = btn.innerHTML;
-                    btn.innerHTML = '🔮 AI Scanning...';
+                    btn.innerHTML = '🔮 Processing...';
                     btn.disabled = true;
                     btn.style.opacity = '0.7';
                     
-                    // Reset after 3 seconds (or when page reloads)
                     setTimeout(() => {
                         btn.innerHTML = originalText;
                         btn.disabled = false;
