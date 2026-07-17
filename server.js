@@ -1,29 +1,29 @@
-// server.js - With Telegram ID Validation
+// server.js - With Telegram Validation (with fallback)
 const express = require('express');
 const session = require('express-session');
 const sqlite3 = require('sqlite3').verbose();
 const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
-const axios = require('axios'); // For Telegram API calls
+const axios = require('axios');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
 
 // ===== TELEGRAM BOT CONFIG =====
-// You need to create a bot and get the token from @BotFather
-const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || ''; // Set this in Railway Variables
-const TELEGRAM_API_URL = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}`;
+const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '';
+// If no token, validation will be skipped (for testing)
+const SKIP_VALIDATION = process.env.SKIP_VALIDATION === 'true' || !TELEGRAM_BOT_TOKEN;
 
 console.log('🔧 Configuration:');
-console.log(`📦 TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN ? '✅ Set' : '❌ Not Set - Validation will be disabled'}`);
+console.log(`📦 TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN ? '✅ Set' : '❌ Not Set'}`);
+console.log(`🔓 SKIP_VALIDATION: ${SKIP_VALIDATION ? '✅ Yes (testing mode)' : '❌ No'}`);
 
 // ============ Setup ============
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-// Ensure views directory exists
 const viewsDir = path.join(__dirname, 'views');
 if (!fs.existsSync(viewsDir)) {
     fs.mkdirSync(viewsDir, { recursive: true });
@@ -38,7 +38,6 @@ const db = new sqlite3.Database('./database.db', (err) => {
     }
 });
 
-// Create tables
 db.serialize(() => {
     db.run(`CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -80,20 +79,29 @@ app.use(session({
 
 // ============ TELEGRAM VALIDATION FUNCTION ============
 async function validateTelegramId(telegramId, username) {
-    // If no bot token, skip validation (for testing)
+    // If SKIP_VALIDATION is true, always return valid
+    if (SKIP_VALIDATION) {
+        console.log('⚠️ Validation skipped (testing mode)');
+        return { valid: true, name: username };
+    }
+
     if (!TELEGRAM_BOT_TOKEN) {
-        console.log('⚠️ No bot token set, skipping validation');
+        console.log('⚠️ No bot token, skipping validation');
         return { valid: true, name: username };
     }
 
     try {
-        // Method 1: Try to get user info from Telegram API
+        // Method 1: Check if user exists in Telegram
+        console.log(`🔍 Checking Telegram ID: ${telegramId}`);
+        
         const response = await axios.get(`${TELEGRAM_API_URL}/getChat`, {
-            params: { chat_id: telegramId }
+            params: { chat_id: telegramId },
+            timeout: 5000
         });
 
         if (response.data && response.data.ok) {
             const user = response.data.result;
+            console.log('✅ Telegram user found:', user.first_name);
             return { 
                 valid: true, 
                 name: user.first_name + (user.last_name ? ' ' + user.last_name : ''),
@@ -102,23 +110,26 @@ async function validateTelegramId(telegramId, username) {
         }
         return { valid: false, error: 'Invalid Telegram ID' };
     } catch (error) {
-        // Method 2: Alternative check - try to send a message
+        console.log('❌ Telegram API error:', error.message);
+        
+        // Method 2: Try to send a test message
         try {
             const testMessage = await axios.post(`${TELEGRAM_API_URL}/sendMessage`, {
                 chat_id: telegramId,
-                text: '🔐 This is a validation test from Shortlink Pro. If you see this, your ID is valid!',
+                text: '🔐 Validation test from Shortlink Pro',
                 disable_notification: true
-            });
+            }, { timeout: 5000 });
 
             if (testMessage.data && testMessage.data.ok) {
+                console.log('✅ Test message sent successfully');
                 return { valid: true, name: username };
             }
-            return { valid: false, error: 'Cannot reach this Telegram user' };
+            return { valid: false, error: 'Cannot reach this user' };
         } catch (sendError) {
-            console.log('❌ Telegram validation failed:', sendError.message);
+            console.log('❌ Send message failed:', sendError.message);
             return { 
                 valid: false, 
-                error: 'Invalid Telegram ID. Please make sure you entered the correct ID.' 
+                error: 'Invalid Telegram ID. Make sure you entered the correct ID and the bot can message you.' 
             };
         }
     }
@@ -189,15 +200,27 @@ app.post('/login', async (req, res) => {
         });
     }
 
+    // Clean telegramId (remove any spaces or special chars)
+    const cleanTelegramId = telegramId.trim().replace(/[^0-9]/g, '');
+    
+    if (!cleanTelegramId) {
+        return res.render('index', {
+            page: 'login',
+            error: 'Please enter a valid numeric Telegram ID',
+            success: null,
+            info: null
+        });
+    }
+
     // ===== STEP 1: Validate Telegram ID =====
-    console.log('🔍 Validating Telegram ID...');
-    const validation = await validateTelegramId(telegramId, username);
+    console.log('🔍 Validating Telegram ID:', cleanTelegramId);
+    const validation = await validateTelegramId(cleanTelegramId, username);
     
     if (!validation.valid) {
         console.log('❌ Validation failed:', validation.error);
         return res.render('index', {
             page: 'login',
-            error: validation.error || 'Invalid Telegram ID. Please check and try again.',
+            error: validation.error || '❌ Invalid Telegram ID. Please make sure:\n1. You entered the correct ID\n2. You have started the bot (@shortlink_validator_bot)\n3. Try again',
             success: null,
             info: null
         });
@@ -205,8 +228,8 @@ app.post('/login', async (req, res) => {
 
     console.log('✅ Telegram ID validated successfully!');
 
-    // ===== STEP 2: Check if user exists in database =====
-    db.get('SELECT * FROM users WHERE telegramId = ?', [telegramId], (err, user) => {
+    // ===== STEP 2: Check if user exists =====
+    db.get('SELECT * FROM users WHERE telegramId = ?', [cleanTelegramId], (err, user) => {
         if (err) {
             console.error('❌ Database error:', err);
             return res.render('index', { 
@@ -217,10 +240,11 @@ app.post('/login', async (req, res) => {
             });
         }
 
+        const finalName = validation.name || username;
+
         if (user) {
-            // Update existing user
             db.run('UPDATE users SET name = ?, lastSeen = CURRENT_TIMESTAMP, isOnline = 1, isValidated = 1 WHERE id = ?', 
-                [validation.name || username, user.id], (err) => {
+                [finalName, user.id], (err) => {
                     if (err) {
                         console.error('❌ Update error:', err);
                         return res.render('index', { 
@@ -232,19 +256,18 @@ app.post('/login', async (req, res) => {
                     }
                     req.session.user = { 
                         id: user.id, 
-                        name: validation.name || username,
-                        telegramId: telegramId
+                        name: finalName,
+                        telegramId: cleanTelegramId
                     };
                     req.session.save((err) => {
                         if (err) console.error('Session save error:', err);
-                        console.log('✅ User logged in:', username);
+                        console.log('✅ User logged in:', finalName);
                         res.redirect('/dashboard');
                     });
                 });
         } else {
-            // Create new validated user
             db.run('INSERT INTO users (telegramId, name, isOnline, isValidated) VALUES (?, ?, 1, 1)',
-                [telegramId, validation.name || username], function(err) {
+                [cleanTelegramId, finalName], function(err) {
                     if (err) {
                         console.error('❌ Registration error:', err);
                         return res.render('index', { 
@@ -256,12 +279,12 @@ app.post('/login', async (req, res) => {
                     }
                     req.session.user = { 
                         id: this.lastID, 
-                        name: validation.name || username,
-                        telegramId: telegramId
+                        name: finalName,
+                        telegramId: cleanTelegramId
                     };
                     req.session.save((err) => {
                         if (err) console.error('Session save error:', err);
-                        console.log('✅ New validated user registered:', username);
+                        console.log('✅ New validated user registered:', finalName);
                         res.redirect('/dashboard');
                     });
                 });
@@ -282,10 +305,7 @@ app.post('/logout', (req, res) => {
 
 // Dashboard
 app.get('/dashboard', (req, res) => {
-    console.log('📊 Dashboard access, user:', req.session.user);
-    
     if (!req.session.user) {
-        console.log('❌ No user in session, redirecting to login');
         return res.redirect('/login');
     }
 
@@ -298,8 +318,6 @@ app.get('/dashboard', (req, res) => {
                 console.error('❌ Links fetch error:', err);
                 return res.redirect('/');
             }
-
-            console.log(`📊 Found ${links.length} links for user`);
 
             const totalClicks = links.reduce((sum, link) => sum + link.clicks, 0);
             
@@ -327,27 +345,14 @@ app.get('/dashboard', (req, res) => {
 
 // Shorten Link
 app.post('/shorten', (req, res) => {
-    console.log('🔗 Shorten request, user:', req.session.user);
-    
     if (!req.session.user) {
-        console.log('❌ No user in session');
         return res.redirect('/login');
     }
 
     const { originalUrl, customSlug } = req.body;
     
     if (!originalUrl) {
-        const errorMsg = 'Please provide a URL';
-        if (req.headers.referer && req.headers.referer.includes('/dashboard')) {
-            return res.redirect('/dashboard?error=' + encodeURIComponent(errorMsg));
-        }
-        return res.render('index', { 
-            page: 'home', 
-            error: errorMsg,
-            success: null,
-            info: null,
-            shortUrl: null
-        });
+        return res.redirect('/dashboard?error=Please provide a URL');
     }
 
     let shortCode = customSlug || generateShortCode();
@@ -360,17 +365,7 @@ app.post('/shorten', (req, res) => {
 
         if (existing) {
             if (customSlug) {
-                const errorMsg = `"${customSlug}" is already taken`;
-                if (req.headers.referer && req.headers.referer.includes('/dashboard')) {
-                    return res.redirect('/dashboard?error=' + encodeURIComponent(errorMsg));
-                }
-                return res.render('index', { 
-                    page: 'home', 
-                    error: errorMsg,
-                    success: null,
-                    info: null,
-                    shortUrl: null
-                });
+                return res.redirect('/dashboard?error=' + encodeURIComponent(`"${customSlug}" is already taken`));
             }
             shortCode = generateShortCode();
         }
@@ -390,7 +385,7 @@ app.post('/shorten', (req, res) => {
     });
 });
 
-// Redirect to original URL
+// Redirect
 app.get('/:shortCode', (req, res) => {
     const { shortCode } = req.params;
     
@@ -468,6 +463,7 @@ app.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Server running on port ${PORT}`);
     console.log(`🔗 Base URL: ${BASE_URL}`);
     console.log(`📦 Database: SQLite`);
-    console.log(`📱 Telegram Validation: ${TELEGRAM_BOT_TOKEN ? '✅ Enabled' : '❌ Disabled (set TELEGRAM_BOT_TOKEN)'}`);
+    console.log(`📱 Telegram Validation: ${TELEGRAM_BOT_TOKEN ? '✅ Enabled' : '❌ Disabled'}`);
+    console.log(`🔓 Testing Mode: ${SKIP_VALIDATION ? '✅ ON (any ID works)' : '❌ OFF'}`);
     console.log(`✅ Ready to use!`);
 });
