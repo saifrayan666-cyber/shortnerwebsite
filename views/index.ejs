@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ShortLink Pro - Smart URL Shortener</title>
+    <title>This Person Is brand Shortlink</title>
     <style>
         /* Unique Design System */
         :root {
@@ -62,12 +62,20 @@
         }
 
         .logo {
-            font-size: 1.8rem;
+            font-size: 1.5rem;
             font-weight: 800;
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             text-decoration: none;
+        }
+
+        .logo span {
+            font-size: 0.8rem;
+            display: block;
+            color: var(--text-muted);
+            -webkit-text-fill-color: var(--text-muted);
+            font-weight: 300;
         }
 
         .nav-links {
@@ -244,12 +252,14 @@
             text-decoration: none;
             font-weight: 600;
             word-break: break-all;
+            font-size: 1.1rem;
         }
 
         .link-card .link-original {
             color: var(--text-muted);
             font-size: 0.9rem;
             word-break: break-all;
+            margin-top: 0.3rem;
         }
 
         .link-card .link-meta {
@@ -334,6 +344,16 @@
 
             .stats-grid {
                 grid-template-columns: 1fr 1fr;
+            }
+
+            .link-card .link-actions form {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .link-card .link-actions input[type="url"] {
+                min-width: auto;
+                width: 100%;
             }
         }
 
@@ -506,12 +526,34 @@
             background: #00ff88;
             display: inline-block;
         }
+
+        /* Brand Name in Center */
+        .brand-center {
+            text-align: center;
+            padding: 1rem 0;
+        }
+
+        .brand-center h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+        }
+
+        .brand-center p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
     </style>
 </head>
 <body>
     <!-- Navigation -->
     <nav class="navbar">
-        <a href="/" class="logo">🔗 ShortLink</a>
+        <a href="/" class="logo">
+            🔗 This Person Is brand Shortlink
+            <span>Smart URL Shortener</span>
+        </a>
         <div class="nav-links">
             <a href="/">Home</a>
             <a href="/dashboard">Dashboard</a>
@@ -583,8 +625,13 @@
 
         <!-- Home Page -->
         <% if (page === 'home') { %>
+            <div class="brand-center fade-in">
+                <h1>This Person Is brand Shortlink</h1>
+                <p>Create, manage and track your short links</p>
+            </div>
+
             <div class="glass-card fade-in" style="max-width: 800px; margin: 0 auto;">
-                <h1 style="font-size: 2.8rem; margin-bottom: 0.5rem;">
+                <h1 style="font-size: 2.2rem; margin-bottom: 0.5rem;">
                     Shorten Your <span style="background: linear-gradient(135deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Links</span>
                 </h1>
                 <p style="color: var(--text-muted); font-size: 1.1rem; margin-bottom: 2rem;">
@@ -601,7 +648,7 @@
                             <label for="customSlug">Custom Slug (Optional)</label>
                             <input type="text" class="form-control" id="customSlug" name="customSlug" placeholder="my-link">
                         </div>
-                        <button type="submit" class="btn btn-primary" style="width: 100%;">🚀 Shorten Link</button>
+                        <button type="submit" class="btn btn-primary" style="width: 100%;">🚀 Create Short Link</button>
                     </form>
 
                     <% if (typeof shortUrl !== 'undefined' && shortUrl) { %>
@@ -660,8 +707,8 @@
         <% if (page === 'dashboard') { %>
             <div class="fade-in">
                 <div class="dashboard-header">
-                    <h1>📊 Dashboard</h1>
-                    <a href="/" class="btn btn-primary">+ New Link</a>
+                    <h1>📊 My Dashboard</h1>
+                    <a href="/" class="btn btn-primary">+ Create New Link</a>
                 </div>
 
                 <div class="stats-grid">
@@ -679,7 +726,7 @@
                     </div>
                 </div>
 
-                <h2 style="margin-bottom: 1.5rem;">Your Links</h2>
+                <h2 style="margin-bottom: 1.5rem;">My Short Links</h2>
                 <% if (typeof links !== 'undefined' && links && links.length > 0) { %>
                     <% links.forEach(function(link) { %>
                         <div class="link-card">
@@ -694,19 +741,19 @@
                             </div>
                             <div class="link-actions">
                                 <form action="/update-link/<%= link.id %>" method="POST">
-                                    <input type="url" name="newUrl" placeholder="New URL" required>
-                                    <button type="submit" class="btn btn-primary" style="padding: 0.3rem 1rem;">Update</button>
+                                    <input type="url" name="newUrl" placeholder="Enter new URL" required>
+                                    <button type="submit" class="btn btn-primary" style="padding: 0.3rem 1rem;">🔄 Update</button>
                                 </form>
                                 <form action="/delete-link/<%= link.id %>" method="POST" style="display: inline;">
-                                    <button type="submit" class="btn btn-danger" style="padding: 0.3rem 1rem;" onclick="return confirm('Delete this link?')">Delete</button>
+                                    <button type="submit" class="btn btn-danger" style="padding: 0.3rem 1rem;" onclick="return confirm('Are you sure you want to delete this link?')">🗑️ Delete</button>
                                 </form>
                             </div>
                         </div>
                     <% }); %>
                 <% } else { %>
                     <div class="glass-card" style="text-align: center; padding: 3rem;">
-                        <p style="color: var(--text-muted); font-size: 1.2rem;">No links created yet</p>
-                        <a href="/" class="btn btn-primary" style="margin-top: 1rem;">Create Your First Link</a>
+                        <p style="color: var(--text-muted); font-size: 1.2rem;">You haven't created any links yet</p>
+                        <a href="/" class="btn btn-primary" style="margin-top: 1rem;">✨ Create Your First Link</a>
                     </div>
                 <% } %>
             </div>
@@ -715,7 +762,7 @@
 
     <!-- Footer -->
     <footer style="text-align: center; padding: 2rem; color: var(--text-muted); border-top: 1px solid var(--glass-border); margin-top: 4rem;">
-        <p>🔗 ShortLink Pro &bull; Built with ❤️ &bull; Powered by Telegram</p>
+        <p>🔗 This Person Is brand Shortlink &bull; Built with ❤️ &bull; Powered by Telegram</p>
         <p style="font-size: 0.8rem; margin-top: 0.5rem;">© 2026 All rights reserved</p>
     </footer>
 
