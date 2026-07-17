@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>This Person Is brand Shortlink</title>
+    
+    <!-- ===== FAVICON ===== -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔗</text></svg>">
+    <!-- Fallback PNG favicon -->
+    <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAB8UlEQVR4nO2VPU8CQRiE5xbLxNgRoiGIvwBDQViwMf6BICGB2Gq8nQ0WENuC2mmJMX6ABYnglSbt/kCwIBD5iJqL3LIPe3thTCbJ7e3szO7O3M5AKpVKpVKpVCqV6r9hfR/zgPfjX+ADH3ga9r6kMA4DoD8MCY3jNWEcBkA9Py5N45j8EF5H+L0dWk6I5wEHiZ0xj0V4BQ8xrQuAXAaTNUiRBMuFAaqhiNucOZI+ySA9PglYqHqs9Nj4MlVjXsc9XJHAUmLpMZB6XxOoDPdZ/4xNlA++e/dUZtIEmWbTGfN4sYVkg83DHRV5txNvIDxK3C9F8KCHe8hN+LLErYhZxg3zsohW6LGueC4P8UZEb2M9jBwFYPMIqWZzHmH4AIDBc0/A4il8Kz9IjK9nKb3zQae8tRshsS7rF2/ce7A6liKc4vv5/d0REggz5BJuWmRg3R4QLgH1xr5bNfYOSAB8ZmtCPg7KvYyPZ7ANQmJdtkDuv9e8qTBCkICx7ojov6GBpcSGzwrxEgJgVAohO24eN51t65cwtweAXX9CngzqLgAqAWuRMMDSHtLWc5f1z9jMC1A9hMVTANtwKKf4Hw8Z8gHYTgdu/CcF2On6OAV4D/aQSmWj/ALaK6ME+pOpoQAAAABJRU5ErkJggg==">
+    
     <style>
         /* ===== UNIQUE DESIGN SYSTEM ===== */
         :root {
@@ -65,25 +71,52 @@
             gap: 1rem;
         }
 
-        .logo {
-            font-size: 1.4rem;
-            font-weight: 800;
+        /* ===== LOGO WITH ICON ===== */
+        .logo-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
             text-decoration: none;
         }
 
-        .logo .brand {
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            box-shadow: 0 4px 15px rgba(108, 99, 255, 0.3);
+            flex-shrink: 0;
+            transition: transform 0.3s;
+        }
+
+        .logo-icon:hover {
+            transform: scale(1.05) rotate(-5deg);
+        }
+
+        .logo-text {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .logo-text .brand {
+            font-size: 1.3rem;
+            font-weight: 800;
             background: linear-gradient(135deg, var(--primary), var(--secondary), var(--accent));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            line-height: 1.2;
         }
 
-        .logo .sub {
-            font-size: 0.7rem;
-            display: block;
+        .logo-text .sub {
+            font-size: 0.65rem;
             color: var(--text-muted);
-            -webkit-text-fill-color: var(--text-muted);
             font-weight: 300;
             letter-spacing: 1px;
+            -webkit-text-fill-color: var(--text-muted);
         }
 
         .nav-links {
@@ -371,6 +404,11 @@
                 min-width: auto;
                 width: 100%;
             }
+
+            .logo-wrapper {
+                width: 100%;
+                justify-content: center;
+            }
         }
 
         /* ===== ANIMATIONS ===== */
@@ -607,10 +645,15 @@
     <!-- NAVIGATION -->
     <!-- ============================================================ -->
     <nav class="navbar">
-        <a href="/" class="logo">
-            <span class="brand">🔗 This Person Is brand Shortlink</span>
-            <span class="sub">Smart URL Shortener</span>
+        <!-- ===== LOGO WITH ICON ===== -->
+        <a href="/" class="logo-wrapper">
+            <div class="logo-icon">🔗</div>
+            <div class="logo-text">
+                <span class="brand">This Person Is brand Shortlink</span>
+                <span class="sub">Smart URL Shortener</span>
+            </div>
         </a>
+
         <div class="nav-links">
             <a href="/">Home</a>
             <a href="/dashboard">Dashboard</a>
@@ -642,7 +685,6 @@
 
         <!-- ===== ALERTS ===== -->
         <% 
-            // Get error/success from query params (for dashboard redirects)
             const queryError = typeof error !== 'undefined' ? error : null;
             const querySuccess = typeof success !== 'undefined' ? success : null;
             const queryInfo = typeof info !== 'undefined' ? info : null;
@@ -886,7 +928,7 @@
     <!-- FOOTER -->
     <!-- ============================================================ -->
     <footer style="text-align: center; padding: 2rem; color: var(--text-muted); border-top: 1px solid var(--glass-border); margin-top: 4rem;">
-        <p>🔗 This Person Is brand Shortlink &bull; Built with ❤️ &bull; Powered by Telegram</p>
+        <p>🔗 This Person Is brand Shortlink &bull; Built with ❤️ &bull; Powered by @thispersonisbrand537</p>
         <p style="font-size: 0.8rem; margin-top: 0.5rem;">© 2026 All rights reserved</p>
     </footer>
 
@@ -940,7 +982,7 @@
                     }
                 }
             } catch (e) {
-                // Silent fail - no need to spam console
+                // Silent fail
             }
         }, 10000);
     </script>
