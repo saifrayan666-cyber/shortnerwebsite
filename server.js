@@ -1,14 +1,23 @@
-// server.js - Complete Fixed Version
+// server.js - With Telegram ID Validation
 const express = require('express');
 const session = require('express-session');
 const sqlite3 = require('sqlite3').verbose();
 const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
+const axios = require('axios'); // For Telegram API calls
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
+
+// ===== TELEGRAM BOT CONFIG =====
+// You need to create a bot and get the token from @BotFather
+const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || ''; // Set this in Railway Variables
+const TELEGRAM_API_URL = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}`;
+
+console.log('🔧 Configuration:');
+console.log(`📦 TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN ? '✅ Set' : '❌ Not Set - Validation will be disabled'}`);
 
 // ============ Setup ============
 app.set('view engine', 'ejs');
@@ -37,7 +46,8 @@ db.serialize(() => {
         name TEXT,
         createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
         lastSeen DATETIME DEFAULT CURRENT_TIMESTAMP,
-        isOnline INTEGER DEFAULT 0
+        isOnline INTEGER DEFAULT 0,
+        isValidated INTEGER DEFAULT 0
     )`);
 
     db.run(`CREATE TABLE IF NOT EXISTS links (
@@ -57,17 +67,62 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
-// Session with better config
 app.use(session({
     secret: process.env.SESSION_SECRET || crypto.randomBytes(32).toString('hex'),
     resave: true,
     saveUninitialized: true,
     cookie: { 
         maxAge: 1000 * 60 * 60 * 24 * 7,
-        secure: false, // Set to true in production with HTTPS
+        secure: false,
         httpOnly: true
     }
 }));
+
+// ============ TELEGRAM VALIDATION FUNCTION ============
+async function validateTelegramId(telegramId, username) {
+    // If no bot token, skip validation (for testing)
+    if (!TELEGRAM_BOT_TOKEN) {
+        console.log('⚠️ No bot token set, skipping validation');
+        return { valid: true, name: username };
+    }
+
+    try {
+        // Method 1: Try to get user info from Telegram API
+        const response = await axios.get(`${TELEGRAM_API_URL}/getChat`, {
+            params: { chat_id: telegramId }
+        });
+
+        if (response.data && response.data.ok) {
+            const user = response.data.result;
+            return { 
+                valid: true, 
+                name: user.first_name + (user.last_name ? ' ' + user.last_name : ''),
+                username: user.username || username
+            };
+        }
+        return { valid: false, error: 'Invalid Telegram ID' };
+    } catch (error) {
+        // Method 2: Alternative check - try to send a message
+        try {
+            const testMessage = await axios.post(`${TELEGRAM_API_URL}/sendMessage`, {
+                chat_id: telegramId,
+                text: '🔐 This is a validation test from Shortlink Pro. If you see this, your ID is valid!',
+                disable_notification: true
+            });
+
+            if (testMessage.data && testMessage.data.ok) {
+                return { valid: true, name: username };
+            }
+            return { valid: false, error: 'Cannot reach this Telegram user' };
+        } catch (sendError) {
+            console.log('❌ Telegram validation failed:', sendError.message);
+            return { 
+                valid: false, 
+                error: 'Invalid Telegram ID. Please make sure you entered the correct ID.' 
+            };
+        }
+    }
+}
 
 // ============ Helper Functions ============
 function getOnlineUsers(callback) {
@@ -83,7 +138,6 @@ function generateShortCode() {
 
 // ============ Middleware for templates ============
 app.use((req, res, next) => {
-    // Make user available in all templates
     res.locals.user = req.session.user || null;
     res.locals.page = req.path === '/' ? 'home' : req.path.slice(1);
     
@@ -120,7 +174,8 @@ app.get('/login', (req, res) => {
     });
 });
 
-app.post('/login', (req, res) => {
+// Login with Telegram Validation
+app.post('/login', async (req, res) => {
     const { telegramId, username } = req.body;
     
     console.log('📱 Login attempt:', { telegramId, username });
@@ -134,12 +189,29 @@ app.post('/login', (req, res) => {
         });
     }
 
+    // ===== STEP 1: Validate Telegram ID =====
+    console.log('🔍 Validating Telegram ID...');
+    const validation = await validateTelegramId(telegramId, username);
+    
+    if (!validation.valid) {
+        console.log('❌ Validation failed:', validation.error);
+        return res.render('index', {
+            page: 'login',
+            error: validation.error || 'Invalid Telegram ID. Please check and try again.',
+            success: null,
+            info: null
+        });
+    }
+
+    console.log('✅ Telegram ID validated successfully!');
+
+    // ===== STEP 2: Check if user exists in database =====
     db.get('SELECT * FROM users WHERE telegramId = ?', [telegramId], (err, user) => {
         if (err) {
             console.error('❌ Database error:', err);
             return res.render('index', { 
                 page: 'login', 
-                error: 'Database error',
+                error: 'Database error. Please try again.',
                 success: null,
                 info: null
             });
@@ -147,18 +219,22 @@ app.post('/login', (req, res) => {
 
         if (user) {
             // Update existing user
-            db.run('UPDATE users SET name = ?, lastSeen = CURRENT_TIMESTAMP, isOnline = 1 WHERE id = ?', 
-                [username, user.id], (err) => {
+            db.run('UPDATE users SET name = ?, lastSeen = CURRENT_TIMESTAMP, isOnline = 1, isValidated = 1 WHERE id = ?', 
+                [validation.name || username, user.id], (err) => {
                     if (err) {
                         console.error('❌ Update error:', err);
                         return res.render('index', { 
                             page: 'login', 
-                            error: 'Update failed',
+                            error: 'Update failed. Please try again.',
                             success: null,
                             info: null
                         });
                     }
-                    req.session.user = { id: user.id, name: username };
+                    req.session.user = { 
+                        id: user.id, 
+                        name: validation.name || username,
+                        telegramId: telegramId
+                    };
                     req.session.save((err) => {
                         if (err) console.error('Session save error:', err);
                         console.log('✅ User logged in:', username);
@@ -166,22 +242,26 @@ app.post('/login', (req, res) => {
                     });
                 });
         } else {
-            // Create new user
-            db.run('INSERT INTO users (telegramId, name, isOnline) VALUES (?, ?, 1)',
-                [telegramId, username], function(err) {
+            // Create new validated user
+            db.run('INSERT INTO users (telegramId, name, isOnline, isValidated) VALUES (?, ?, 1, 1)',
+                [telegramId, validation.name || username], function(err) {
                     if (err) {
                         console.error('❌ Registration error:', err);
                         return res.render('index', { 
                             page: 'login', 
-                            error: 'Registration failed',
+                            error: 'Registration failed. Please try again.',
                             success: null,
                             info: null
                         });
                     }
-                    req.session.user = { id: this.lastID, name: username };
+                    req.session.user = { 
+                        id: this.lastID, 
+                        name: validation.name || username,
+                        telegramId: telegramId
+                    };
                     req.session.save((err) => {
                         if (err) console.error('Session save error:', err);
-                        console.log('✅ New user registered:', username);
+                        console.log('✅ New validated user registered:', username);
                         res.redirect('/dashboard');
                     });
                 });
@@ -209,11 +289,9 @@ app.get('/dashboard', (req, res) => {
         return res.redirect('/login');
     }
 
-    // Update online status
     db.run('UPDATE users SET isOnline = 1, lastSeen = CURRENT_TIMESTAMP WHERE id = ?', 
         [req.session.user.id]);
 
-    // Get user's links
     db.all('SELECT * FROM links WHERE userId = ? ORDER BY createdAt DESC', 
         [req.session.user.id], (err, links) => {
             if (err) {
@@ -247,7 +325,7 @@ app.get('/dashboard', (req, res) => {
         });
 });
 
-// Shorten Link (from dashboard or home)
+// Shorten Link
 app.post('/shorten', (req, res) => {
     console.log('🔗 Shorten request, user:', req.session.user);
     
@@ -307,7 +385,6 @@ app.post('/shorten', (req, res) => {
                 const shortUrl = `${BASE_URL}/${shortCode}`;
                 console.log('✅ Link created:', shortUrl);
                 
-                // Redirect back to dashboard with success
                 res.redirect('/dashboard?success=' + encodeURIComponent('Link created successfully!'));
             });
     });
@@ -332,7 +409,7 @@ app.get('/:shortCode', (req, res) => {
     });
 });
 
-// Update Link (from dashboard)
+// Update Link
 app.post('/update-link/:id', (req, res) => {
     if (!req.session.user) {
         return res.redirect('/login');
@@ -354,7 +431,7 @@ app.post('/update-link/:id', (req, res) => {
         });
 });
 
-// Delete Link (from dashboard)
+// Delete Link
 app.post('/delete-link/:id', (req, res) => {
     if (!req.session.user) {
         return res.redirect('/login');
@@ -391,6 +468,6 @@ app.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Server running on port ${PORT}`);
     console.log(`🔗 Base URL: ${BASE_URL}`);
     console.log(`📦 Database: SQLite`);
+    console.log(`📱 Telegram Validation: ${TELEGRAM_BOT_TOKEN ? '✅ Enabled' : '❌ Disabled (set TELEGRAM_BOT_TOKEN)'}`);
     console.log(`✅ Ready to use!`);
-    console.log(`📱 Site: This Person Is brand Shortlink`);
 });
