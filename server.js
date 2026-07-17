@@ -1,4 +1,4 @@
-// server.js - SQLite Version (Fixed)
+// server.js - SQLite Version (Final)
 const express = require('express');
 const session = require('express-session');
 const sqlite3 = require('sqlite3').verbose();
@@ -148,7 +148,7 @@ app.post('/login', (req, res) => {
                         });
                     }
                     req.session.user = { id: user.id, name: username };
-                    res.redirect('/');
+                    res.redirect('/dashboard');
                 });
         } else {
             db.run('INSERT INTO users (telegramId, name, isOnline) VALUES (?, ?, 1)',
@@ -162,7 +162,7 @@ app.post('/login', (req, res) => {
                         });
                     }
                     req.session.user = { id: this.lastID, name: username };
-                    res.redirect('/');
+                    res.redirect('/dashboard');
                 });
         }
     });
@@ -222,6 +222,16 @@ app.post('/shorten', (req, res) => {
     }
 
     const { originalUrl, customSlug } = req.body;
+    
+    if (!originalUrl) {
+        return res.render('index', { 
+            page: 'home', 
+            error: 'Please provide a URL',
+            success: null,
+            info: null
+        });
+    }
+
     let shortCode = customSlug || generateShortCode();
 
     db.get('SELECT * FROM links WHERE shortCode = ?', [shortCode], (err, existing) => {
@@ -261,7 +271,7 @@ app.post('/shorten', (req, res) => {
                 res.render('index', {
                     page: 'home',
                     shortUrl,
-                    success: 'Link created successfully!',
+                    success: '✅ Link created successfully!',
                     error: null,
                     info: null
                 });
@@ -269,7 +279,7 @@ app.post('/shorten', (req, res) => {
     });
 });
 
-// Redirect
+// Redirect to original URL
 app.get('/:shortCode', (req, res) => {
     const { shortCode } = req.params;
     
@@ -295,8 +305,16 @@ app.post('/update-link/:id', (req, res) => {
     }
 
     const { newUrl } = req.body;
+    
+    if (!newUrl) {
+        return res.redirect('/dashboard');
+    }
+
     db.run('UPDATE links SET originalUrl = ?, updatedAt = CURRENT_TIMESTAMP WHERE id = ? AND userId = ?',
         [newUrl, req.params.id, req.session.user.id], (err) => {
+            if (err) {
+                console.error('Update error:', err);
+            }
             res.redirect('/dashboard');
         });
 });
@@ -309,6 +327,9 @@ app.post('/delete-link/:id', (req, res) => {
 
     db.run('DELETE FROM links WHERE id = ? AND userId = ?', 
         [req.params.id, req.session.user.id], (err) => {
+            if (err) {
+                console.error('Delete error:', err);
+            }
             res.redirect('/dashboard');
         });
 });
@@ -335,4 +356,5 @@ app.listen(PORT, '0.0.0.0', () => {
     console.log(`🔗 Base URL: ${BASE_URL}`);
     console.log(`📦 Database: SQLite`);
     console.log(`✅ Ready to use!`);
+    console.log(`📱 Site Name: This Person Is brand Shortlink`);
 });
