@@ -1,9 +1,10 @@
-// server.js - SQLite Version (No MongoDB needed)
+// server.js - SQLite Version (Fixed)
 const express = require('express');
 const session = require('express-session');
 const sqlite3 = require('sqlite3').verbose();
 const crypto = require('crypto');
 const path = require('path');
+const fs = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -13,8 +14,20 @@ const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-// ============ SQLite Database Setup ============
-const db = new sqlite3.Database('./database.db');
+// ============ Ensure views directory exists ============
+const viewsDir = path.join(__dirname, 'views');
+if (!fs.existsSync(viewsDir)) {
+    fs.mkdirSync(viewsDir, { recursive: true });
+}
+
+// ============ SQLite Database ============
+const db = new sqlite3.Database('./database.db', (err) => {
+    if (err) {
+        console.error('❌ Database connection error:', err.message);
+    } else {
+        console.log('✅ SQLite database connected');
+    }
+});
 
 // Create tables
 db.serialize(() => {
@@ -38,8 +51,6 @@ db.serialize(() => {
         FOREIGN KEY(userId) REFERENCES users(id)
     )`);
 });
-
-console.log('✅ SQLite database ready!');
 
 // ============ Middleware ============
 app.use(express.json());
@@ -84,13 +95,23 @@ app.use((req, res, next) => {
 
 // Home
 app.get('/', (req, res) => {
-    res.render('index', { page: 'home' });
+    res.render('index', { 
+        page: 'home',
+        error: null,
+        success: null,
+        info: null
+    });
 });
 
 // Login
 app.get('/login', (req, res) => {
     if (req.session.user) return res.redirect('/');
-    res.render('index', { page: 'login' });
+    res.render('index', { 
+        page: 'login',
+        error: null,
+        success: null,
+        info: null
+    });
 });
 
 app.post('/login', (req, res) => {
@@ -99,20 +120,32 @@ app.post('/login', (req, res) => {
     if (!telegramId || !username) {
         return res.render('index', {
             page: 'login',
-            error: 'Please provide both Telegram ID and Name'
+            error: 'Please provide both Telegram ID and Name',
+            success: null,
+            info: null
         });
     }
 
     db.get('SELECT * FROM users WHERE telegramId = ?', [telegramId], (err, user) => {
         if (err) {
-            return res.render('index', { page: 'login', error: 'Database error' });
+            return res.render('index', { 
+                page: 'login', 
+                error: 'Database error',
+                success: null,
+                info: null
+            });
         }
 
         if (user) {
             db.run('UPDATE users SET name = ?, lastSeen = CURRENT_TIMESTAMP, isOnline = 1 WHERE id = ?', 
                 [username, user.id], (err) => {
                     if (err) {
-                        return res.render('index', { page: 'login', error: 'Update failed' });
+                        return res.render('index', { 
+                            page: 'login', 
+                            error: 'Update failed',
+                            success: null,
+                            info: null
+                        });
                     }
                     req.session.user = { id: user.id, name: username };
                     res.redirect('/');
@@ -121,7 +154,12 @@ app.post('/login', (req, res) => {
             db.run('INSERT INTO users (telegramId, name, isOnline) VALUES (?, ?, 1)',
                 [telegramId, username], function(err) {
                     if (err) {
-                        return res.render('index', { page: 'login', error: 'Registration failed' });
+                        return res.render('index', { 
+                            page: 'login', 
+                            error: 'Registration failed',
+                            success: null,
+                            info: null
+                        });
                     }
                     req.session.user = { id: this.lastID, name: username };
                     res.redirect('/');
@@ -168,7 +206,10 @@ app.get('/dashboard', (req, res) => {
                     links: linksWithUrl,
                     totalClicks,
                     onlineUsers: count,
-                    onlineUserList: users
+                    onlineUserList: users,
+                    error: null,
+                    success: null,
+                    info: null
                 });
             });
         });
@@ -185,14 +226,21 @@ app.post('/shorten', (req, res) => {
 
     db.get('SELECT * FROM links WHERE shortCode = ?', [shortCode], (err, existing) => {
         if (err) {
-            return res.render('index', { page: 'home', error: 'Database error' });
+            return res.render('index', { 
+                page: 'home', 
+                error: 'Database error',
+                success: null,
+                info: null
+            });
         }
 
         if (existing) {
             if (customSlug) {
                 return res.render('index', { 
                     page: 'home', 
-                    error: `"${customSlug}" is already taken. Please choose another.` 
+                    error: `"${customSlug}" is already taken. Please choose another.`,
+                    success: null,
+                    info: null
                 });
             }
             shortCode = generateShortCode();
@@ -201,14 +249,21 @@ app.post('/shorten', (req, res) => {
         db.run('INSERT INTO links (shortCode, originalUrl, userId) VALUES (?, ?, ?)',
             [shortCode, originalUrl, req.session.user.id], function(err) {
                 if (err) {
-                    return res.render('index', { page: 'home', error: 'Failed to create link' });
+                    return res.render('index', { 
+                        page: 'home', 
+                        error: 'Failed to create link',
+                        success: null,
+                        info: null
+                    });
                 }
 
                 const shortUrl = `${BASE_URL}/${shortCode}`;
                 res.render('index', {
                     page: 'home',
                     shortUrl,
-                    success: 'Link created successfully!'
+                    success: 'Link created successfully!',
+                    error: null,
+                    info: null
                 });
             });
     });
@@ -266,6 +321,12 @@ app.get('/api/online-users', (req, res) => {
             users: users || []
         });
     });
+});
+
+// ============ Error Handler ============
+app.use((err, req, res, next) => {
+    console.error('❌ Server Error:', err.message);
+    res.status(500).send('Something went wrong! Check server logs.');
 });
 
 // ============ Start Server ============
