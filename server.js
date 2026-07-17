@@ -1,4 +1,4 @@
-// server.js - SQLite Version (Final)
+// server.js - Complete Fixed Version
 const express = require('express');
 const session = require('express-session');
 const sqlite3 = require('sqlite3').verbose();
@@ -10,11 +10,11 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
 
-// ============ Setup Views ============
+// ============ Setup ============
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-// ============ Ensure views directory exists ============
+// Ensure views directory exists
 const viewsDir = path.join(__dirname, 'views');
 if (!fs.existsSync(viewsDir)) {
     fs.mkdirSync(viewsDir, { recursive: true });
@@ -23,7 +23,7 @@ if (!fs.existsSync(viewsDir)) {
 // ============ SQLite Database ============
 const db = new sqlite3.Database('./database.db', (err) => {
     if (err) {
-        console.error('❌ Database connection error:', err.message);
+        console.error('❌ Database error:', err.message);
     } else {
         console.log('✅ SQLite database connected');
     }
@@ -57,13 +57,15 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
+// Session with better config
 app.use(session({
     secret: process.env.SESSION_SECRET || crypto.randomBytes(32).toString('hex'),
-    resave: false,
-    saveUninitialized: false,
+    resave: true,
+    saveUninitialized: true,
     cookie: { 
         maxAge: 1000 * 60 * 60 * 24 * 7,
-        secure: process.env.NODE_ENV === 'production'
+        secure: false, // Set to true in production with HTTPS
+        httpOnly: true
     }
 }));
 
@@ -81,6 +83,7 @@ function generateShortCode() {
 
 // ============ Middleware for templates ============
 app.use((req, res, next) => {
+    // Make user available in all templates
     res.locals.user = req.session.user || null;
     res.locals.page = req.path === '/' ? 'home' : req.path.slice(1);
     
@@ -99,13 +102,16 @@ app.get('/', (req, res) => {
         page: 'home',
         error: null,
         success: null,
-        info: null
+        info: null,
+        shortUrl: null
     });
 });
 
 // Login
 app.get('/login', (req, res) => {
-    if (req.session.user) return res.redirect('/');
+    if (req.session.user) {
+        return res.redirect('/dashboard');
+    }
     res.render('index', { 
         page: 'login',
         error: null,
@@ -116,6 +122,8 @@ app.get('/login', (req, res) => {
 
 app.post('/login', (req, res) => {
     const { telegramId, username } = req.body;
+    
+    console.log('📱 Login attempt:', { telegramId, username });
     
     if (!telegramId || !username) {
         return res.render('index', {
@@ -128,6 +136,7 @@ app.post('/login', (req, res) => {
 
     db.get('SELECT * FROM users WHERE telegramId = ?', [telegramId], (err, user) => {
         if (err) {
+            console.error('❌ Database error:', err);
             return res.render('index', { 
                 page: 'login', 
                 error: 'Database error',
@@ -137,9 +146,11 @@ app.post('/login', (req, res) => {
         }
 
         if (user) {
+            // Update existing user
             db.run('UPDATE users SET name = ?, lastSeen = CURRENT_TIMESTAMP, isOnline = 1 WHERE id = ?', 
                 [username, user.id], (err) => {
                     if (err) {
+                        console.error('❌ Update error:', err);
                         return res.render('index', { 
                             page: 'login', 
                             error: 'Update failed',
@@ -148,12 +159,18 @@ app.post('/login', (req, res) => {
                         });
                     }
                     req.session.user = { id: user.id, name: username };
-                    res.redirect('/dashboard');
+                    req.session.save((err) => {
+                        if (err) console.error('Session save error:', err);
+                        console.log('✅ User logged in:', username);
+                        res.redirect('/dashboard');
+                    });
                 });
         } else {
+            // Create new user
             db.run('INSERT INTO users (telegramId, name, isOnline) VALUES (?, ?, 1)',
                 [telegramId, username], function(err) {
                     if (err) {
+                        console.error('❌ Registration error:', err);
                         return res.render('index', { 
                             page: 'login', 
                             error: 'Registration failed',
@@ -162,7 +179,11 @@ app.post('/login', (req, res) => {
                         });
                     }
                     req.session.user = { id: this.lastID, name: username };
-                    res.redirect('/dashboard');
+                    req.session.save((err) => {
+                        if (err) console.error('Session save error:', err);
+                        console.log('✅ New user registered:', username);
+                        res.redirect('/dashboard');
+                    });
                 });
         }
     });
@@ -173,24 +194,34 @@ app.post('/logout', (req, res) => {
     if (req.session.user) {
         db.run('UPDATE users SET isOnline = 0 WHERE id = ?', [req.session.user.id]);
     }
-    req.session.destroy();
-    res.redirect('/');
+    req.session.destroy((err) => {
+        if (err) console.error('Session destroy error:', err);
+        res.redirect('/');
+    });
 });
 
 // Dashboard
 app.get('/dashboard', (req, res) => {
+    console.log('📊 Dashboard access, user:', req.session.user);
+    
     if (!req.session.user) {
+        console.log('❌ No user in session, redirecting to login');
         return res.redirect('/login');
     }
 
+    // Update online status
     db.run('UPDATE users SET isOnline = 1, lastSeen = CURRENT_TIMESTAMP WHERE id = ?', 
         [req.session.user.id]);
 
+    // Get user's links
     db.all('SELECT * FROM links WHERE userId = ? ORDER BY createdAt DESC', 
         [req.session.user.id], (err, links) => {
             if (err) {
+                console.error('❌ Links fetch error:', err);
                 return res.redirect('/');
             }
+
+            console.log(`📊 Found ${links.length} links for user`);
 
             const totalClicks = links.reduce((sum, link) => sum + link.clicks, 0);
             
@@ -204,31 +235,40 @@ app.get('/dashboard', (req, res) => {
                     page: 'dashboard',
                     user: req.session.user,
                     links: linksWithUrl,
-                    totalClicks,
+                    totalClicks: totalClicks,
                     onlineUsers: count,
                     onlineUserList: users,
                     error: null,
                     success: null,
-                    info: null
+                    info: null,
+                    shortUrl: null
                 });
             });
         });
 });
 
-// Shorten Link
+// Shorten Link (from dashboard or home)
 app.post('/shorten', (req, res) => {
+    console.log('🔗 Shorten request, user:', req.session.user);
+    
     if (!req.session.user) {
+        console.log('❌ No user in session');
         return res.redirect('/login');
     }
 
     const { originalUrl, customSlug } = req.body;
     
     if (!originalUrl) {
+        const errorMsg = 'Please provide a URL';
+        if (req.headers.referer && req.headers.referer.includes('/dashboard')) {
+            return res.redirect('/dashboard?error=' + encodeURIComponent(errorMsg));
+        }
         return res.render('index', { 
             page: 'home', 
-            error: 'Please provide a URL',
+            error: errorMsg,
             success: null,
-            info: null
+            info: null,
+            shortUrl: null
         });
     }
 
@@ -236,21 +276,22 @@ app.post('/shorten', (req, res) => {
 
     db.get('SELECT * FROM links WHERE shortCode = ?', [shortCode], (err, existing) => {
         if (err) {
-            return res.render('index', { 
-                page: 'home', 
-                error: 'Database error',
-                success: null,
-                info: null
-            });
+            console.error('❌ Database error:', err);
+            return res.redirect('/dashboard?error=Database error');
         }
 
         if (existing) {
             if (customSlug) {
+                const errorMsg = `"${customSlug}" is already taken`;
+                if (req.headers.referer && req.headers.referer.includes('/dashboard')) {
+                    return res.redirect('/dashboard?error=' + encodeURIComponent(errorMsg));
+                }
                 return res.render('index', { 
                     page: 'home', 
-                    error: `"${customSlug}" is already taken. Please choose another.`,
+                    error: errorMsg,
                     success: null,
-                    info: null
+                    info: null,
+                    shortUrl: null
                 });
             }
             shortCode = generateShortCode();
@@ -259,22 +300,15 @@ app.post('/shorten', (req, res) => {
         db.run('INSERT INTO links (shortCode, originalUrl, userId) VALUES (?, ?, ?)',
             [shortCode, originalUrl, req.session.user.id], function(err) {
                 if (err) {
-                    return res.render('index', { 
-                        page: 'home', 
-                        error: 'Failed to create link',
-                        success: null,
-                        info: null
-                    });
+                    console.error('❌ Insert error:', err);
+                    return res.redirect('/dashboard?error=Failed to create link');
                 }
 
                 const shortUrl = `${BASE_URL}/${shortCode}`;
-                res.render('index', {
-                    page: 'home',
-                    shortUrl,
-                    success: '✅ Link created successfully!',
-                    error: null,
-                    info: null
-                });
+                console.log('✅ Link created:', shortUrl);
+                
+                // Redirect back to dashboard with success
+                res.redirect('/dashboard?success=' + encodeURIComponent('Link created successfully!'));
             });
     });
 });
@@ -283,7 +317,7 @@ app.post('/shorten', (req, res) => {
 app.get('/:shortCode', (req, res) => {
     const { shortCode } = req.params;
     
-    const routes = ['login', 'dashboard', 'logout', 'shorten', 'update-link', 'delete-link', 'api'];
+    const routes = ['login', 'dashboard', 'logout', 'shorten', 'update-link', 'delete-link', 'api', 'signup'];
     if (routes.includes(shortCode)) {
         return res.redirect('/');
     }
@@ -298,7 +332,7 @@ app.get('/:shortCode', (req, res) => {
     });
 });
 
-// Update Link
+// Update Link (from dashboard)
 app.post('/update-link/:id', (req, res) => {
     if (!req.session.user) {
         return res.redirect('/login');
@@ -307,19 +341,20 @@ app.post('/update-link/:id', (req, res) => {
     const { newUrl } = req.body;
     
     if (!newUrl) {
-        return res.redirect('/dashboard');
+        return res.redirect('/dashboard?error=Please provide a new URL');
     }
 
     db.run('UPDATE links SET originalUrl = ?, updatedAt = CURRENT_TIMESTAMP WHERE id = ? AND userId = ?',
         [newUrl, req.params.id, req.session.user.id], (err) => {
             if (err) {
-                console.error('Update error:', err);
+                console.error('❌ Update error:', err);
+                return res.redirect('/dashboard?error=Update failed');
             }
-            res.redirect('/dashboard');
+            res.redirect('/dashboard?success=Link updated successfully!');
         });
 });
 
-// Delete Link
+// Delete Link (from dashboard)
 app.post('/delete-link/:id', (req, res) => {
     if (!req.session.user) {
         return res.redirect('/login');
@@ -328,9 +363,10 @@ app.post('/delete-link/:id', (req, res) => {
     db.run('DELETE FROM links WHERE id = ? AND userId = ?', 
         [req.params.id, req.session.user.id], (err) => {
             if (err) {
-                console.error('Delete error:', err);
+                console.error('❌ Delete error:', err);
+                return res.redirect('/dashboard?error=Delete failed');
             }
-            res.redirect('/dashboard');
+            res.redirect('/dashboard?success=Link deleted successfully!');
         });
 });
 
@@ -356,5 +392,5 @@ app.listen(PORT, '0.0.0.0', () => {
     console.log(`🔗 Base URL: ${BASE_URL}`);
     console.log(`📦 Database: SQLite`);
     console.log(`✅ Ready to use!`);
-    console.log(`📱 Site Name: This Person Is brand Shortlink`);
+    console.log(`📱 Site: This Person Is brand Shortlink`);
 });
