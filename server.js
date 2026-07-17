@@ -1,4 +1,4 @@
-// server.js - Complete Working Version
+// server.js - Complete Version with Indexes for Performance
 const express = require('express');
 const session = require('express-session');
 const sqlite3 = require('sqlite3').verbose();
@@ -9,7 +9,10 @@ const axios = require('axios');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
+
+// ===== BASE_URL - IMPORTANT: No trailing slash =====
+const BASE_URL = (process.env.BASE_URL || 'http://localhost:3000').replace(/\/+$/, '');
+console.log(`🔗 BASE_URL: ${BASE_URL}`);
 
 // ===== TELEGRAM BOT CONFIG =====
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '';
@@ -18,7 +21,6 @@ const SKIP_VALIDATION = process.env.SKIP_VALIDATION === 'true' || !TELEGRAM_BOT_
 console.log('🔧 Configuration:');
 console.log(`📦 TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN ? '✅ Set' : '❌ Not Set'}`);
 console.log(`🔓 SKIP_VALIDATION: ${SKIP_VALIDATION ? '✅ Yes (testing mode)' : '❌ No'}`);
-console.log(`🔗 BASE_URL: ${BASE_URL}`);
 
 // ============ Setup ============
 app.set('view engine', 'ejs');
@@ -39,8 +41,9 @@ const db = new sqlite3.Database('./database.db', (err) => {
     }
 });
 
-// Create tables
+// ============ CREATE TABLES WITH INDEXES ============
 db.serialize(() => {
+    // ===== USERS TABLE =====
     db.run(`CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         telegramId TEXT UNIQUE,
@@ -51,6 +54,7 @@ db.serialize(() => {
         isValidated INTEGER DEFAULT 0
     )`);
 
+    // ===== LINKS TABLE =====
     db.run(`CREATE TABLE IF NOT EXISTS links (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         shortCode TEXT UNIQUE,
@@ -61,6 +65,26 @@ db.serialize(() => {
         updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY(userId) REFERENCES users(id)
     )`);
+
+    // ============================================================
+    // INDEXES FOR BETTER PERFORMANCE (যখন অনেক ডেটা হবে)
+    // ============================================================
+    
+    // Users table indexes
+    db.run(`CREATE INDEX IF NOT EXISTS idx_users_telegramId ON users(telegramId)`);
+    db.run(`CREATE INDEX IF NOT EXISTS idx_users_isOnline ON users(isOnline)`);
+    db.run(`CREATE INDEX IF NOT EXISTS idx_users_createdAt ON users(createdAt)`);
+    
+    // Links table indexes
+    db.run(`CREATE INDEX IF NOT EXISTS idx_links_userId ON links(userId)`);
+    db.run(`CREATE INDEX IF NOT EXISTS idx_links_shortCode ON links(shortCode)`);
+    db.run(`CREATE INDEX IF NOT EXISTS idx_links_createdAt ON links(createdAt)`);
+    db.run(`CREATE INDEX IF NOT EXISTS idx_links_clicks ON links(clicks)`);
+    
+    // Composite indexes for common queries
+    db.run(`CREATE INDEX IF NOT EXISTS idx_links_user_created ON links(userId, createdAt)`);
+    
+    console.log('✅ Database tables and indexes created successfully');
 });
 
 // ============ Middleware ============
@@ -296,6 +320,7 @@ app.get('/dashboard', (req, res) => {
     db.run('UPDATE users SET isOnline = 1, lastSeen = CURRENT_TIMESTAMP WHERE id = ?', 
         [req.session.user.id]);
 
+    // ===== OPTIMIZED QUERY with indexes =====
     db.all('SELECT * FROM links WHERE userId = ? ORDER BY createdAt DESC', 
         [req.session.user.id], (err, links) => {
             if (err) {
@@ -307,7 +332,7 @@ app.get('/dashboard', (req, res) => {
 
             const totalClicks = links.reduce((sum, link) => sum + link.clicks, 0);
             
-            // Create proper URL for each link
+            // Create proper URL without double slash
             const linksWithUrl = links.map(link => ({
                 id: link.id,
                 shortCode: link.shortCode,
@@ -363,6 +388,7 @@ app.post('/shorten', (req, res) => {
 
     let shortCode = customSlug || generateShortCode();
 
+    // ===== OPTIMIZED QUERY with index on shortCode =====
     db.get('SELECT * FROM links WHERE shortCode = ?', [shortCode], (err, existing) => {
         if (err) {
             console.error('❌ Database error:', err);
@@ -410,6 +436,7 @@ app.get('/:shortCode', (req, res) => {
         return res.redirect('/');
     }
 
+    // ===== OPTIMIZED QUERY with index on shortCode =====
     db.get('SELECT * FROM links WHERE shortCode = ?', [shortCode], (err, link) => {
         if (err || !link) {
             return res.status(404).send('Link not found');
@@ -468,18 +495,35 @@ app.get('/api/online-users', (req, res) => {
     });
 });
 
+// ============ DATABASE STATS ROUTE (Optional - for monitoring) ============
+app.get('/api/stats', (req, res) => {
+    db.get('SELECT COUNT(*) as totalUsers FROM users', (err, userCount) => {
+        db.get('SELECT COUNT(*) as totalLinks FROM links', (err, linkCount) => {
+            db.get('SELECT COUNT(*) as onlineUsers FROM users WHERE isOnline = 1', (err, onlineCount) => {
+                res.json({
+                    totalUsers: userCount ? userCount.totalUsers : 0,
+                    totalLinks: linkCount ? linkCount.totalLinks : 0,
+                    onlineUsers: onlineCount ? onlineCount.onlineUsers : 0
+                });
+            });
+        });
+    });
+});
+
 // ============ Error Handler ============
 app.use((err, req, res, next) => {
     console.error('❌ Server Error:', err.message);
+    console.error('Stack:', err.stack);
     res.status(500).send('Something went wrong! Check server logs.');
 });
 
 // ============ Start Server ============
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Server running on port ${PORT}`);
-    console.log(`🔗 Base URL: ${BASE_URL}`);
-    console.log(`📦 Database: SQLite`);
+    console.log(`🔗 BASE_URL: ${BASE_URL}`);
+    console.log(`📦 Database: SQLite (with indexes)`);
     console.log(`📱 Telegram Validation: ${TELEGRAM_BOT_TOKEN ? '✅ Enabled' : '❌ Disabled'}`);
     console.log(`🔓 Testing Mode: ${SKIP_VALIDATION ? '✅ ON (any ID works)' : '❌ OFF'}`);
     console.log(`✅ Ready to use!`);
+    console.log(`📊 API Stats: ${BASE_URL}/api/stats`);
 });
