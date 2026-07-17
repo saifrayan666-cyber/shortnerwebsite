@@ -31,6 +31,7 @@
             --telegram: #0088cc;
             --success: #00FF88;
             --danger: #FF4466;
+            --warning: #FFB800;
             --neon-blue: #00D4FF;
             --neon-purple: #9B59FF;
             --neon-pink: #FF6584;
@@ -343,6 +344,16 @@
             transform: translateY(-2px) scale(1.02);
         }
 
+        .btn-warning {
+            background: linear-gradient(135deg, var(--warning), #F09B00);
+            color: var(--dark);
+            box-shadow: 0 4px 25px rgba(255, 184, 0, 0.3);
+        }
+
+        .btn-warning:hover {
+            transform: translateY(-2px) scale(1.02);
+        }
+
         .btn-telegram {
             background: linear-gradient(135deg, var(--telegram), #005f8a);
             color: white;
@@ -356,6 +367,11 @@
 
         .btn-glow {
             animation: btnPulse 2s ease-in-out infinite;
+        }
+
+        .btn-sm {
+            padding: 0.3rem 1rem;
+            font-size: 0.75rem;
         }
 
         @keyframes btnPulse {
@@ -528,6 +544,14 @@
             box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.5);
         }
 
+        .link-card .link-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
         .link-card .link-url {
             color: var(--accent);
             text-decoration: none;
@@ -565,35 +589,49 @@
 
         .link-card .link-actions {
             display: flex;
-            gap: 0.8rem;
+            gap: 0.6rem;
             margin-top: 1rem;
             flex-wrap: wrap;
             position: relative;
             z-index: 1;
         }
 
-        .link-card .link-actions form {
+        .link-card .link-actions .btn-group {
             display: flex;
             gap: 0.5rem;
             flex-wrap: wrap;
             align-items: center;
         }
 
-        .link-card .link-actions input[type="url"] {
+        .link-card .link-actions .edit-form {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            align-items: center;
+            width: 100%;
+        }
+
+        .link-card .link-actions .edit-form input[type="url"] {
             background: rgba(255,255,255,0.04);
             border: 1px solid var(--glass-border);
             border-radius: 10px;
             padding: 0.4rem 0.8rem;
             color: var(--text);
             min-width: 200px;
+            flex: 1;
             font-family: 'Inter', sans-serif;
             transition: all 0.3s;
         }
 
-        .link-card .link-actions input[type="url"]:focus {
+        .link-card .link-actions .edit-form input[type="url"]:focus {
             border-color: var(--primary);
             outline: none;
             box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.1);
+        }
+
+        .link-card .link-actions .edit-form .edit-actions {
+            display: flex;
+            gap: 0.4rem;
         }
 
         /* ============================================================ */
@@ -870,6 +908,22 @@
         }
 
         /* ============================================================ */
+        /* UNLIMITED BADGE */
+        /* ============================================================ */
+        .unlimited-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--success), #00CC66);
+            color: var(--dark);
+            padding: 0.2rem 0.8rem;
+            border-radius: 50px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.2);
+        }
+
+        /* ============================================================ */
         /* LOGIN BOX */
         /* ============================================================ */
         .login-box {
@@ -996,14 +1050,19 @@
                 min-width: auto;
             }
 
-            .link-card .link-actions form {
+            .link-card .link-actions .edit-form {
                 flex-direction: column;
                 width: 100%;
             }
 
-            .link-card .link-actions input[type="url"] {
+            .link-card .link-actions .edit-form input[type="url"] {
                 min-width: auto;
                 width: 100%;
+            }
+
+            .link-card .link-actions .btn-group {
+                width: 100%;
+                justify-content: center;
             }
 
             .glass-card {
@@ -1185,11 +1244,14 @@
 
             <!-- Main Shorten Form -->
             <div class="glass-card fade-in" style="max-width: 800px; margin: 0 auto;">
-                <h1 style="font-size: 2rem; margin-bottom: 0.3rem; font-weight: 800;">
-                    Shorten Your <span style="background: linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Links</span>
-                </h1>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
+                    <h1 style="font-size: 2rem; font-weight: 800;">
+                        Shorten Your <span style="background: linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Links</span>
+                    </h1>
+                    <span class="unlimited-badge">♾️ Unlimited</span>
+                </div>
                 <p style="color: var(--text-muted); font-size: 1rem; margin-bottom: 2rem;">
-                    Create short, memorable links that update automatically
+                    Create unlimited short, memorable links that update automatically
                 </p>
 
                 <% if (typeof user !== 'undefined' && user) { %>
@@ -1205,7 +1267,7 @@
                                    placeholder="my-link">
                         </div>
                         <button type="submit" class="btn btn-primary btn-glow" style="width: 100%; padding: 0.9rem;" id="shortenBtn">
-                            🚀 Shorten Link
+                            🚀 Create Short Link
                         </button>
                     </form>
 
@@ -1246,6 +1308,11 @@
             <!-- Features -->
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-top: 2rem;">
                 <div class="glass-card" style="text-align: center;">
+                    <div style="font-size: 3rem; margin-bottom: 0.5rem;">♾️</div>
+                    <h3 style="font-weight: 700;">Unlimited Links</h3>
+                    <p style="color: var(--text-muted); font-size: 0.9rem;">Create as many short links as you want, no limits!</p>
+                </div>
+                <div class="glass-card" style="text-align: center;">
                     <div style="font-size: 3rem; margin-bottom: 0.5rem;">🔄</div>
                     <h3 style="font-weight: 700;">Updateable Links</h3>
                     <p style="color: var(--text-muted); font-size: 0.9rem;">Change destination URL anytime, all short links update automatically</p>
@@ -1254,11 +1321,6 @@
                     <div style="font-size: 3rem; margin-bottom: 0.5rem;">👀</div>
                     <h3 style="font-weight: 700;">Click Tracking</h3>
                     <p style="color: var(--text-muted); font-size: 0.9rem;">Monitor how many times your links are clicked in real-time</p>
-                </div>
-                <div class="glass-card" style="text-align: center;">
-                    <div style="font-size: 3rem; margin-bottom: 0.5rem;">📊</div>
-                    <h3 style="font-weight: 700;">Live Analytics</h3>
-                    <p style="color: var(--text-muted); font-size: 0.9rem;">See who's using the site with live user tracking</p>
                 </div>
             </div>
         <% } %>
@@ -1271,7 +1333,10 @@
 
                 <!-- Dashboard Header -->
                 <div class="dashboard-header">
-                    <h1>📊 Dashboard</h1>
+                    <div>
+                        <h1>📊 Dashboard</h1>
+                        <span class="unlimited-badge" style="margin-top: 0.3rem;">♾️ Unlimited Short Links</span>
+                    </div>
                     <a href="/" class="btn btn-primary btn-glow">+ Create New Link</a>
                 </div>
 
@@ -1288,6 +1353,10 @@
                     <div class="stat-card">
                         <div class="number"><%= typeof onlineUsers !== 'undefined' ? onlineUsers : 0 %></div>
                         <div class="label">Online Users</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="number">♾️</div>
+                        <div class="label">Unlimited</div>
                     </div>
                 </div>
 
@@ -1313,30 +1382,40 @@
                 <% if (typeof links !== 'undefined' && links && links.length > 0) { %>
                     <% links.forEach(function(link) { %>
                         <div class="link-card">
-                            <div>
-                                <a href="/<%= link.shortCode %>" target="_blank" class="link-url">
-                                    🔗 <%= link.shortUrl %>
-                                </a>
+                            <div class="link-top">
+                                <div>
+                                    <a href="/<%= link.shortCode %>" target="_blank" class="link-url">
+                                        🔗 <%= link.shortUrl %>
+                                    </a>
+                                    <div class="link-original">→ <%= link.originalUrl %></div>
+                                </div>
+                                <!-- Copy Button -->
+                                <button class="btn btn-secondary btn-sm" onclick="copyToClipboard('<%= link.shortUrl %>')" style="flex-shrink: 0;">
+                                    📋 Copy
+                                </button>
                             </div>
-                            <div class="link-original">→ <%= link.originalUrl %></div>
                             <div class="link-meta">
                                 <span>👁️ <%= link.clicks %> clicks</span>
                                 <span>📅 <%= link.createdAt %></span>
                                 <span>🆔 <%= link.shortCode %></span>
                             </div>
                             <div class="link-actions">
-                                <form action="/update-link/<%= link.id %>" method="POST">
+                                <!-- Edit/Update Form -->
+                                <form action="/update-link/<%= link.id %>" method="POST" class="edit-form">
                                     <input type="url" name="newUrl" placeholder="Enter new URL" required>
-                                    <button type="submit" class="btn btn-primary" style="padding: 0.3rem 1.2rem;">
-                                        🔄 Update
-                                    </button>
+                                    <div class="edit-actions">
+                                        <button type="submit" class="btn btn-warning btn-sm">✏️ Update</button>
+                                    </div>
                                 </form>
-                                <form action="/delete-link/<%= link.id %>" method="POST" style="display: inline;">
-                                    <button type="submit" class="btn btn-danger" style="padding: 0.3rem 1.2rem;"
-                                            onclick="return confirm('Are you sure you want to delete this link?')">
-                                        🗑️ Delete
-                                    </button>
-                                </form>
+                                <!-- Delete Button -->
+                                <div class="btn-group">
+                                    <form action="/delete-link/<%= link.id %>" method="POST" style="display: inline;">
+                                        <button type="submit" class="btn btn-danger btn-sm"
+                                                onclick="return confirm('Are you sure you want to delete this link?')">
+                                            🗑️ Delete
+                                        </button>
+                                    </form>
+                                </div>
                             </div>
                         </div>
                     <% }); %>
@@ -1368,7 +1447,7 @@
             </a>
         </p>
         <p style="font-size: 0.75rem; margin-top: 0.5rem; opacity: 0.5;">
-            © 2026 All rights reserved
+            © 2026 All rights reserved &bull; ♾️ Unlimited Short Links
         </p>
     </footer>
 
@@ -1565,7 +1644,7 @@
         }, 10000);
 
         // ============================================================
-        // SCANNING ANIMATION ON FORM SUBMIT
+        // PROCESSING ANIMATION ON FORM SUBMIT
         // ============================================================
         document.addEventListener('DOMContentLoaded', function() {
             const form = document.getElementById('shortenForm');
