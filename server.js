@@ -1,4 +1,4 @@
-// server.js - With Telegram Validation (with fallback)
+// server.js - Complete Working Version
 const express = require('express');
 const session = require('express-session');
 const sqlite3 = require('sqlite3').verbose();
@@ -13,17 +13,18 @@ const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
 
 // ===== TELEGRAM BOT CONFIG =====
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '';
-// If no token, validation will be skipped (for testing)
 const SKIP_VALIDATION = process.env.SKIP_VALIDATION === 'true' || !TELEGRAM_BOT_TOKEN;
 
 console.log('🔧 Configuration:');
 console.log(`📦 TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN ? '✅ Set' : '❌ Not Set'}`);
 console.log(`🔓 SKIP_VALIDATION: ${SKIP_VALIDATION ? '✅ Yes (testing mode)' : '❌ No'}`);
+console.log(`🔗 BASE_URL: ${BASE_URL}`);
 
 // ============ Setup ============
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
+// Ensure views directory exists
 const viewsDir = path.join(__dirname, 'views');
 if (!fs.existsSync(viewsDir)) {
     fs.mkdirSync(viewsDir, { recursive: true });
@@ -38,6 +39,7 @@ const db = new sqlite3.Database('./database.db', (err) => {
     }
 });
 
+// Create tables
 db.serialize(() => {
     db.run(`CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -79,7 +81,6 @@ app.use(session({
 
 // ============ TELEGRAM VALIDATION FUNCTION ============
 async function validateTelegramId(telegramId, username) {
-    // If SKIP_VALIDATION is true, always return valid
     if (SKIP_VALIDATION) {
         console.log('⚠️ Validation skipped (testing mode)');
         return { valid: true, name: username };
@@ -91,10 +92,8 @@ async function validateTelegramId(telegramId, username) {
     }
 
     try {
-        // Method 1: Check if user exists in Telegram
         console.log(`🔍 Checking Telegram ID: ${telegramId}`);
-        
-        const response = await axios.get(`${TELEGRAM_API_URL}/getChat`, {
+        const response = await axios.get(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/getChat`, {
             params: { chat_id: telegramId },
             timeout: 5000
         });
@@ -104,34 +103,16 @@ async function validateTelegramId(telegramId, username) {
             console.log('✅ Telegram user found:', user.first_name);
             return { 
                 valid: true, 
-                name: user.first_name + (user.last_name ? ' ' + user.last_name : ''),
-                username: user.username || username
+                name: user.first_name + (user.last_name ? ' ' + user.last_name : '')
             };
         }
         return { valid: false, error: 'Invalid Telegram ID' };
     } catch (error) {
         console.log('❌ Telegram API error:', error.message);
-        
-        // Method 2: Try to send a test message
-        try {
-            const testMessage = await axios.post(`${TELEGRAM_API_URL}/sendMessage`, {
-                chat_id: telegramId,
-                text: '🔐 Validation test from Shortlink Pro',
-                disable_notification: true
-            }, { timeout: 5000 });
-
-            if (testMessage.data && testMessage.data.ok) {
-                console.log('✅ Test message sent successfully');
-                return { valid: true, name: username };
-            }
-            return { valid: false, error: 'Cannot reach this user' };
-        } catch (sendError) {
-            console.log('❌ Send message failed:', sendError.message);
-            return { 
-                valid: false, 
-                error: 'Invalid Telegram ID. Make sure you entered the correct ID and the bot can message you.' 
-            };
-        }
+        return { 
+            valid: false, 
+            error: 'Invalid Telegram ID. Make sure you entered the correct ID.' 
+        };
     }
 }
 
@@ -200,7 +181,7 @@ app.post('/login', async (req, res) => {
         });
     }
 
-    // Clean telegramId (remove any spaces or special chars)
+    // Clean telegramId
     const cleanTelegramId = telegramId.trim().replace(/[^0-9]/g, '');
     
     if (!cleanTelegramId) {
@@ -212,7 +193,7 @@ app.post('/login', async (req, res) => {
         });
     }
 
-    // ===== STEP 1: Validate Telegram ID =====
+    // Validate Telegram ID
     console.log('🔍 Validating Telegram ID:', cleanTelegramId);
     const validation = await validateTelegramId(cleanTelegramId, username);
     
@@ -220,7 +201,7 @@ app.post('/login', async (req, res) => {
         console.log('❌ Validation failed:', validation.error);
         return res.render('index', {
             page: 'login',
-            error: validation.error || '❌ Invalid Telegram ID. Please make sure:\n1. You entered the correct ID\n2. You have started the bot (@shortlink_validator_bot)\n3. Try again',
+            error: validation.error || '❌ Invalid Telegram ID. Please check and try again.',
             success: null,
             info: null
         });
@@ -228,7 +209,7 @@ app.post('/login', async (req, res) => {
 
     console.log('✅ Telegram ID validated successfully!');
 
-    // ===== STEP 2: Check if user exists =====
+    // Check if user exists in database
     db.get('SELECT * FROM users WHERE telegramId = ?', [cleanTelegramId], (err, user) => {
         if (err) {
             console.error('❌ Database error:', err);
@@ -305,7 +286,10 @@ app.post('/logout', (req, res) => {
 
 // Dashboard
 app.get('/dashboard', (req, res) => {
+    console.log('📊 Dashboard access, user:', req.session.user);
+    
     if (!req.session.user) {
+        console.log('❌ No user in session, redirecting to login');
         return res.redirect('/login');
     }
 
@@ -319,12 +303,21 @@ app.get('/dashboard', (req, res) => {
                 return res.redirect('/');
             }
 
+            console.log(`📊 Found ${links.length} links for user`);
+
             const totalClicks = links.reduce((sum, link) => sum + link.clicks, 0);
             
+            // Create proper URL for each link
             const linksWithUrl = links.map(link => ({
-                ...link,
+                id: link.id,
+                shortCode: link.shortCode,
+                originalUrl: link.originalUrl,
+                clicks: link.clicks,
+                createdAt: link.createdAt,
                 shortUrl: `${BASE_URL}/${link.shortCode}`
             }));
+
+            console.log('🔗 First link URL:', linksWithUrl.length > 0 ? linksWithUrl[0].shortUrl : 'No links');
 
             getOnlineUsers((count, users) => {
                 res.render('index', {
@@ -345,14 +338,27 @@ app.get('/dashboard', (req, res) => {
 
 // Shorten Link
 app.post('/shorten', (req, res) => {
+    console.log('🔗 Shorten request, user:', req.session.user);
+    
     if (!req.session.user) {
+        console.log('❌ No user in session');
         return res.redirect('/login');
     }
 
     const { originalUrl, customSlug } = req.body;
     
     if (!originalUrl) {
-        return res.redirect('/dashboard?error=Please provide a URL');
+        const errorMsg = 'Please provide a URL';
+        if (req.headers.referer && req.headers.referer.includes('/dashboard')) {
+            return res.redirect('/dashboard?error=' + encodeURIComponent(errorMsg));
+        }
+        return res.render('index', { 
+            page: 'home', 
+            error: errorMsg,
+            success: null,
+            info: null,
+            shortUrl: null
+        });
     }
 
     let shortCode = customSlug || generateShortCode();
@@ -365,7 +371,17 @@ app.post('/shorten', (req, res) => {
 
         if (existing) {
             if (customSlug) {
-                return res.redirect('/dashboard?error=' + encodeURIComponent(`"${customSlug}" is already taken`));
+                const errorMsg = `"${customSlug}" is already taken`;
+                if (req.headers.referer && req.headers.referer.includes('/dashboard')) {
+                    return res.redirect('/dashboard?error=' + encodeURIComponent(errorMsg));
+                }
+                return res.render('index', { 
+                    page: 'home', 
+                    error: errorMsg,
+                    success: null,
+                    info: null,
+                    shortUrl: null
+                });
             }
             shortCode = generateShortCode();
         }
@@ -385,7 +401,7 @@ app.post('/shorten', (req, res) => {
     });
 });
 
-// Redirect
+// Redirect to original URL
 app.get('/:shortCode', (req, res) => {
     const { shortCode } = req.params;
     
